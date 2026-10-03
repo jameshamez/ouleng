@@ -5,18 +5,16 @@ import {
   bookingSlots,
   itemsTotal,
   promptPayPayload,
-  remainingCapacity,
   resolveOptions,
+  tableStates,
   unitPrice,
 } from "./logic";
 import type { Booking, MenuItem, Table } from "./types";
 
-const tables: Table[] = [
-  { id: "a", code: "A1", zone: "indoor", seats: 2 },
-  { id: "b", code: "A2", zone: "indoor", seats: 4 },
-  { id: "c", code: "A3", zone: "indoor", seats: 6 },
-  { id: "d", code: "C1", zone: "canal", seats: 4 },
-];
+const t = (id: string, seats: number, zone: Table["zone"] = "indoor"): Table => ({
+  id, code: id.toUpperCase(), zone, seats, x: 0, y: 0, w: 2, h: 2, shape: "square", active: true,
+});
+const tables: Table[] = [t("a", 2), t("b", 4), t("c", 6), t("d", 4, "canal")];
 
 const booking = (p: Partial<Booking>): Booking => ({
   id: Math.random().toString(),
@@ -43,35 +41,39 @@ describe("bookingSlots", () => {
   });
 });
 
-describe("remainingCapacity", () => {
-  const q = { date: "2026-10-10", time: "18:00", zone: "indoor" as const, partySize: 2 };
+describe("tableStates", () => {
+  const q = { date: "2026-10-10", time: "18:00", partySize: 2 };
+  const stateOf = (b: Booking[], query = q) => Object.fromEntries(tableStates(tables, b, query).map((t) => [t.id, t.state]));
 
-  it("counts fitting tables when nothing is booked", () => {
-    expect(remainingCapacity(tables, [], q)).toBe(3);
-    expect(remainingCapacity(tables, [], { ...q, partySize: 5 })).toBe(1);
+  it("marks tables that fit the party as free, others unfit", () => {
+    // 2 people: 2- and 4-seaters fit (≤ party + 3), the 6-seater is too big
+    expect(stateOf([])).toEqual({ a: "free", b: "free", c: "unfit", d: "free" });
+    expect(stateOf([], { ...q, partySize: 5 })).toEqual({ a: "unfit", b: "unfit", c: "free", d: "unfit" });
   });
 
-  it("subtracts overlapping bookings, smallest fitting table first", () => {
-    const b = [booking({ party_size: 2, time: "17:00" })];
-    // the 2-seater is taken, the 4 and 6 seaters are still free
-    expect(remainingCapacity(tables, b, q)).toBe(2);
-    expect(remainingCapacity(tables, b, { ...q, partySize: 5 })).toBe(1);
+  it("marks a table taken when its booking overlaps the 2h window", () => {
+    expect(stateOf([booking({ table_id: "b", time: "16:30" })]).b).toBe("taken");
+    expect(stateOf([booking({ table_id: "b", time: "19:30" })]).b).toBe("taken");
+    expect(stateOf([booking({ table_id: "b", time: "16:00" })]).b).toBe("free");
+    expect(stateOf([booking({ table_id: "b", time: "20:00" })]).b).toBe("free");
   });
 
-  it("ignores bookings outside the 2h window, other zones, dates and dead statuses", () => {
+  it("ignores other dates, other tables and dead bookings", () => {
     const b = [
-      booking({ time: "20:00" }),
-      booking({ zone: "canal" }),
-      booking({ date: "2026-10-11" }),
-      booking({ status: "cancelled" }),
-      booking({ status: "rejected" }),
+      booking({ table_id: "b", date: "2026-10-11" }),
+      booking({ table_id: "a", status: "cancelled" }),
+      booking({ table_id: "a", status: "rejected" }),
     ];
-    expect(remainingCapacity(tables, b, q)).toBe(3);
+    expect(stateOf(b)).toEqual({ a: "free", b: "free", c: "unfit", d: "free" });
   });
 
-  it("reaches zero when the zone is full", () => {
-    const b = [booking({}), booking({ party_size: 4 }), booking({ party_size: 6 })];
-    expect(remainingCapacity(tables, b, q)).toBe(0);
+  it("taken wins over unfit so the plan shows what is booked", () => {
+    expect(stateOf([booking({ table_id: "c", party_size: 6 })]).c).toBe("taken");
+  });
+
+  it("skips removed tables", () => {
+    const withRemoved = [...tables, { ...tables[0], id: "z", active: false }];
+    expect(tableStates(withRemoved, [], q).map((t) => t.id)).not.toContain("z");
   });
 });
 

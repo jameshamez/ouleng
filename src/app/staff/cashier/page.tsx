@@ -3,11 +3,20 @@
 import { useState } from "react";
 import { baht, ItemStatusChip, Sheet, Spinner } from "@/components/ui";
 import { api, useApi } from "@/lib/client";
-import type { DiningSession, Order, OrderItem, Payment, Table } from "@/lib/types";
+import { DecorBox, FloorCanvas, FloorLegend, TableBox } from "@/components/FloorPlan";
+import type { Booking, DiningSession, FloorDecor, Order, OrderItem, Payment, Table } from "@/lib/types";
 
-type TableCard = Table & { session: DiningSession | null; total: number; waiting: number; toServe: number; pendingPayment: boolean };
+type TableCard = Table & {
+  session: DiningSession | null;
+  total: number;
+  waiting: number;
+  toServe: number;
+  pendingPayment: boolean;
+  nextBooking: Booking | null;
+};
 type Board = {
   tables: TableCard[];
+  decor: FloorDecor[];
   payments: (Payment & { label: string; slip_view: string | null })[];
   takeaways: (Order & { total: number; items: OrderItem[] })[];
 };
@@ -33,57 +42,46 @@ export default function CashierPage() {
   };
 
   return (
-    <main className="p-4 grid gap-4 lg:grid-cols-[1fr_380px]">
-      <div className="grid gap-4 content-start">
+    <main className="p-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 content-start min-w-0">
         <section>
-          <div className="flex items-end justify-between mb-3">
-            <h1 className="font-display text-2xl text-brand-deep">ผังโต๊ะ</h1>
-            <div className="flex gap-3 text-xs text-muted">
-              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-paper border border-line mr-1" />ว่าง</span>
-              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-brand-light mr-1" />กำลังทาน</span>
-              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-sun mr-1" />ขอเช็กบิล</span>
-            </div>
+          <div className="flex flex-wrap items-end justify-between gap-2 mb-3">
+            <h1 className="font-display text-2xl text-brand-deep">ผังร้าน</h1>
+            <FloorLegend
+              items={[
+                { tone: "free", label: "ว่าง" },
+                { tone: "busy", label: "กำลังทาน" },
+                { tone: "alert", label: "ขอเช็กบิล" },
+                { tone: "taken", label: "มีจองวันนี้" },
+              ]}
+            />
           </div>
-          {(["indoor", "canal"] as const).map((zone) => (
-            <div key={zone} className="mb-4">
-              <h2 className="text-sm font-semibold text-muted mb-2">{zone === "indoor" ? "🏮 ในร้าน" : "🌙 ริมคลอง"}</h2>
-              <div className="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-8 gap-2.5">
-                {data.tables
-                  .filter((t) => t.zone === zone)
-                  .map((t) => {
-                    const st = t.session?.status;
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => setTableId(t.id)}
-                        className={`arch relative border-2 px-2 pt-5 pb-3 text-center transition hover:-translate-y-0.5 ${
-                          st === "bill_requested"
-                            ? "border-sun bg-sun-soft animate-pulse"
-                            : st === "open"
-                              ? "border-brand-light bg-brand-soft"
-                              : "border-line bg-paper"
-                        }`}
-                      >
-                        {t.pendingPayment && <span className="absolute right-1 top-1 h-3 w-3 rounded-full bg-red ring-2 ring-paper" />}
-                        <div className="font-display text-xl text-brand-deep">{t.code}</div>
-                        <div className="text-[11px] text-muted">{t.seats} ที่นั่ง</div>
-                        {t.session ? (
-                          <>
-                            <div className="mt-1 font-semibold text-sm">{baht(t.total)}</div>
-                            <div className="text-[11px] text-muted">
-                              {t.waiting > 0 && `รอ ${t.waiting} `}
-                              {t.toServe > 0 && <span className="text-brand-deep font-semibold">เสิร์ฟ {t.toServe}</span>}
-                            </div>
-                          </>
-                        ) : (
-                          <div className="mt-1 text-xs text-muted">ว่าง</div>
-                        )}
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-          ))}
+          <FloorCanvas minWidth={600}>
+            {data.decor.map((d) => (
+              <DecorBox key={d.id} d={d} />
+            ))}
+            {data.tables.map((t) => {
+              const st = t.session?.status;
+              return (
+                <TableBox
+                  key={t.id}
+                  t={t}
+                  tone={st === "bill_requested" ? "alert" : st === "open" ? "busy" : t.nextBooking ? "taken" : "free"}
+                  sub={t.session ? baht(t.total) : t.nextBooking ? `จอง ${t.nextBooking.time}` : undefined}
+                  onClick={() => setTableId(t.id)}
+                  badge={
+                    t.pendingPayment ? (
+                      <span className="block h-3.5 w-3.5 rounded-full bg-red ring-2 ring-white" title="มีสลิปรอตรวจ" />
+                    ) : t.toServe > 0 ? (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-sun px-1 text-[10px] font-bold text-brand-deep ring-2 ring-white" title="รอเสิร์ฟ">
+                        {t.toServe}
+                      </span>
+                    ) : undefined
+                  }
+                />
+              );
+            })}
+          </FloorCanvas>
         </section>
 
         <section>
@@ -190,6 +188,11 @@ function TableSheet({ table, onClose, onChanged }: { table: TableCard | null; on
   return (
     <Sheet open onClose={onClose} title={`โต๊ะ ${table.code} · ${table.zone === "canal" ? "ริมคลอง" : "ในร้าน"}`}>
       <div className="px-5 pb-6">
+        {table.nextBooking && (
+          <p className="mb-3 rounded-xl bg-sun-soft px-3 py-2 text-sm text-sun-ink">
+            📅 มีจอง {table.nextBooking.time} น. · คุณ{table.nextBooking.name} {table.nextBooking.party_size} ท่าน
+          </p>
+        )}
         {!table.session ? (
           <div className="py-6 text-center">
             <p className="text-muted">โต๊ะว่าง ลูกค้าสแกน QR ที่โต๊ะได้เลย หรือเปิดบิลให้ลูกค้าที่ไม่ใช้ LINE</p>

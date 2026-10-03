@@ -40,6 +40,27 @@ export interface Table {
   code: string;
   zone: Zone;
   seats: number;
+  // Position on the floor plan, in grid cells (see FLOOR_COLS / FLOOR_ROWS).
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  shape: "round" | "square";
+  /** false = removed from the floor (kept so old bills still resolve). */
+  active: boolean;
+}
+
+export type DecorKind = "area" | "canal" | "stage" | "screen" | "counter" | "kitchen" | "entrance";
+
+/** Non-bookable landmarks drawn on the floor plan. */
+export interface FloorDecor {
+  id: string;
+  kind: DecorKind;
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export type BookingStatus = "pending" | "confirmed" | "rejected" | "seated" | "cancelled";
@@ -137,6 +158,7 @@ export interface Tables {
   menu_categories: MenuCategory;
   menu_items: MenuItem;
   tables: Table;
+  floor_decor: FloorDecor;
   bookings: Booking;
   dining_sessions: DiningSession;
   orders: Order;

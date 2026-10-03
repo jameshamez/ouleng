@@ -1,6 +1,6 @@
 # อูเล้งคาเฟ่ — จองโต๊ะ & สั่งอาหารผ่าน LINE
 
-ระบบจองโต๊ะ สั่งที่โต๊ะ (QR) และสั่งกลับบ้าน ผ่าน LINE (LIFF) + หน้าจอร้าน (ครัว / แคชเชียร์ / การจอง / แอดมิน)
+ระบบจองโต๊ะแบบเลือกโต๊ะจากผังร้าน สั่งที่โต๊ะ (QR) และสั่งกลับบ้าน ผ่าน LINE (LIFF) + หน้าจอร้าน (ครัว / แคชเชียร์ / การจอง / แอดมิน)
 Next.js 16 + Supabase + LINE · ธีมสีแบรนด์ร้าน (แดง · ส้มโลโก้ · เหลือง)
 
 ## ลองรันบนเครื่อง (โหมดเดโม — ไม่ต้องมีบัญชีอะไร)
@@ -21,9 +21,9 @@ npm run dev
 
 ### 1. Supabase
 1. สร้างโปรเจกต์ที่ supabase.com (region Singapore)
-2. SQL Editor → รันไฟล์ `supabase/migrations/20261003000000_init.sql`
+2. SQL Editor → รันไฟล์ใน `supabase/migrations/` ตามลำดับชื่อไฟล์ (`…_init.sql` แล้ว `…_floor_plan.sql`)
 3. คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
-4. `npm run seed` — ใส่เมนูเริ่มต้นและโต๊ะ 15 ตัว
+4. `npm run seed` — ใส่เมนูเริ่มต้น โต๊ะ 15 ตัว และผังร้านเริ่มต้น
 
 ### 2. LINE (ใช้บัญชี LINE ของร้าน)
 1. [LINE Official Account](https://manager.line.biz) ของร้าน → เปิด Messaging API
@@ -41,7 +41,7 @@ npm run dev
 — ถ้าไม่ตั้ง ระบบจะไม่ยอมรันในโหมด production
 
 ### 4. Deploy (Vercel)
-Import repo → ใส่ env ทั้งหมด → Deploy → แอดมินเข้า `/staff/admin` → แท็บ "QR ประจำโต๊ะ" → พิมพ์วางโต๊ะ
+Import repo → ใส่ env ทั้งหมด → Deploy → แอดมินเข้า `/staff/admin` → แท็บ "ผังร้าน" จัดโต๊ะให้ตรงร้านจริง → แท็บ "QR ประจำโต๊ะ" → พิมพ์วางโต๊ะ
 
 ## โครงสร้าง
 

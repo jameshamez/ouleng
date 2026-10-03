@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { TableName, Tables } from "../types";
-import { seedCategories, seedMenuItems, seedTables } from "../seed";
+import { seedCategories, seedDecor, seedMenuItems, seedTables } from "../seed";
 import type { Db, Filter } from "./index";
 
 // Local file-backed store so the whole system runs without Supabase/Docker.
@@ -17,6 +17,7 @@ function fresh(): Store {
     menu_categories: structuredClone(seedCategories),
     menu_items: structuredClone(seedMenuItems),
     tables: structuredClone(seedTables),
+    floor_decor: structuredClone(seedDecor),
     bookings: [],
     dining_sessions: [],
     orders: [],
@@ -28,10 +29,18 @@ function fresh(): Store {
 
 function load(): Store {
   try {
-    return { ...fresh(), ...JSON.parse(fs.readFileSync(FILE, "utf8")) };
+    const store: Store = { ...fresh(), ...JSON.parse(fs.readFileSync(FILE, "utf8")) };
+    // Demo files saved before the floor plan existed: give tables their starter positions.
+    store.tables = store.tables.map((t) => (t.x === undefined ? { ...t, ...pos(t.id) } : t));
+    return store;
   } catch {
     return fresh();
   }
+}
+
+function pos(id: string) {
+  const s = seedTables.find((x) => x.id === id);
+  return s ? { x: s.x, y: s.y, w: s.w, h: s.h, shape: s.shape, active: true } : { x: 0, y: 0, w: 2, h: 2, shape: "square" as const, active: true };
 }
 
 function matches<T>(row: T, filter: Filter<T>) {
@@ -69,6 +78,12 @@ export function createDemoDb(): Db {
       Object.assign(row, patch);
       save();
       return clone(row);
+    },
+    async remove(table, id) {
+      const rows = store[table] as { id: string }[];
+      const i = rows.findIndex((r) => r.id === id);
+      if (i >= 0) rows.splice(i, 1);
+      save();
     },
     async upload(name, bytes) {
       fs.mkdirSync(UPLOAD_DIR, { recursive: true });

@@ -11,6 +11,7 @@ export interface Db {
   get<T extends TableName>(table: T, id: string): Promise<Tables[T] | null>;
   insert<T extends TableName>(table: T, row: Tables[T]): Promise<Tables[T]>;
   update<T extends TableName>(table: T, id: string, patch: Partial<Tables[T]>): Promise<Tables[T]>;
+  remove(table: TableName, id: string): Promise<void>;
   /** Store a private file (e.g. a payment slip) and return an opaque reference. */
   upload(name: string, bytes: ArrayBuffer, contentType: string): Promise<string>;
   /** Short-lived URL for staff to view a file stored with `upload`. */

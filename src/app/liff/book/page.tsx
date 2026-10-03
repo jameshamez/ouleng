@@ -6,12 +6,11 @@ import { CartBar, CartLines, MenuBrowser } from "@/components/MenuBrowser";
 import { baht, Stepper, thaiDate, TopBar } from "@/components/ui";
 import { CartProvider, useCart } from "@/lib/cart";
 import { api, useApi } from "@/lib/client";
-import type { Booking, Zone } from "@/lib/types";
+import { DecorBox, FloorCanvas, FloorLegend, TableBox } from "@/components/FloorPlan";
+import type { TableState } from "@/lib/logic";
+import type { Booking, FloorDecor, Table } from "@/lib/types";
 
-const ZONES: { id: Zone; label: string; sub: string; icon: string }[] = [
-  { id: "indoor", label: "ในร้าน", sub: "บรรยากาศตลาดภูเก็ต", icon: "🏮" },
-  { id: "canal", label: "ริมคลอง", sub: "ดนตรีสด · หนังกลางแปลง", icon: "🌙" },
-];
+type FloorTable = Table & { state: TableState };
 
 function nextDays(n: number) {
   const out: string[] = [];
@@ -35,8 +34,8 @@ function BookFlow() {
   const router = useRouter();
   const cart = useCart();
   const days = useMemo(() => nextDays(14), []);
-  const [step, setStep] = useState<"when" | "who" | "menu">("when");
-  const [zone, setZone] = useState<Zone>("canal");
+  const [step, setStep] = useState<"when" | "table" | "who" | "menu">("when");
+  const [tableId, setTableId] = useState<string | null>(null);
   const [party, setParty] = useState(2);
   const [date, setDate] = useState(days[0]);
   const [time, setTime] = useState<string | null>(null);
@@ -46,23 +45,32 @@ function BookFlow() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const { data: slots, isLoading } = useApi<{ time: string; left: number }[]>("availability", { date, partySize: party, zone });
+  const { data: slots, isLoading } = useApi<{ time: string; left: number }[]>("availability", { date, partySize: party });
+  const floor = useApi<{ tables: FloorTable[]; decor: FloorDecor[] }>(
+    time && step !== "when" ? "bookingFloor" : null,
+    { date, time, partySize: party },
+    { refreshInterval: 10_000 },
+  );
+  const table = floor.data?.tables.find((t) => t.id === tableId) ?? null;
   const { data: me } = useApi<{ profile: { displayName: string } }>("me");
   // eslint-disable-next-line react-hooks/set-state-in-effect -- prefill from LINE profile
   useEffect(() => { if (me && !name) setName(me.profile.displayName); }, [me, name]);
   // eslint-disable-next-line react-hooks/set-state-in-effect -- drop a chosen time that just became unavailable
   useEffect(() => { if (time && slots && !slots.find((s) => s.time === time && s.left > 0)) setTime(null); }, [slots, time]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- someone else just booked the chosen table
+  useEffect(() => { if (tableId && floor.data && floor.data.tables.find((t) => t.id === tableId)?.state !== "free") setTableId(null); }, [floor.data, tableId]);
 
   const submit = async () => {
     setBusy(true);
     setErr(null);
     try {
-      const b = await api<Booking>("createBooking", { name, phone, partySize: party, date, time, zone, note, preorder: cart.toPayload() });
+      const b = await api<Booking>("createBooking", { name, phone, partySize: party, date, time, tableId, note, preorder: cart.toPayload() });
       cart.clear();
       router.replace(`/liff/bookings/${b.id}?new=1`);
     } catch (e) {
       setErr((e as Error).message);
       setBusy(false);
+      floor.mutate();
     }
   };
 
@@ -81,24 +89,20 @@ function BookFlow() {
 
   return (
     <>
-      <TopBar title="จองโต๊ะ" back={step === "who" ? undefined : "/liff"} right={step === "who" ? <button className="text-sm text-sun" onClick={() => setStep("when")}>‹ แก้ไขเวลา</button> : undefined} />
+      <TopBar
+        title={step === "table" ? "เลือกโต๊ะ" : "จองโต๊ะ"}
+        back={step === "when" ? "/liff" : undefined}
+        right={
+          step !== "when" ? (
+            <button className="text-sm text-sun" onClick={() => setStep(step === "who" ? "table" : "when")}>
+              ‹ {step === "who" ? "เปลี่ยนโต๊ะ" : "แก้ไขเวลา"}
+            </button>
+          ) : undefined
+        }
+      />
       <main className="mx-auto max-w-md px-4 pb-32">
         {step === "when" && (
           <>
-            <section className="mt-4 grid grid-cols-2 gap-3">
-              {ZONES.map((z) => (
-                <button
-                  key={z.id}
-                  onClick={() => setZone(z.id)}
-                  className={`arch border-2 px-3 pt-7 pb-4 text-center transition ${zone === z.id ? "border-brand bg-brand-soft shadow-md" : "border-line bg-paper"}`}
-                >
-                  <div className="text-3xl">{z.icon}</div>
-                  <div className="font-display text-brand-deep mt-1">{z.label}</div>
-                  <div className="text-[11px] text-muted">{z.sub}</div>
-                </button>
-              ))}
-            </section>
-
             <section className="card mt-4 flex items-center justify-between p-4">
               <div>
                 <div className="font-semibold">จำนวนคน</div>
@@ -152,13 +156,62 @@ function BookFlow() {
           </>
         )}
 
+        {step === "table" && (
+          <section className="mt-4">
+            <p className="text-sm text-muted">
+              {thaiDate(date, true)} · {time} น. · {party} ท่าน — แตะโต๊ะที่ชอบได้เลย
+            </p>
+            <div className="mt-2">
+              <FloorLegend
+                items={[
+                  { tone: "free", label: "ว่าง" },
+                  { tone: "selected", label: "ที่เลือก" },
+                  { tone: "taken", label: "ถูกจองแล้ว" },
+                  { tone: "muted", label: "ขนาดไม่พอดี" },
+                ]}
+              />
+            </div>
+            {!floor.data ? (
+              <p className="py-10 text-center text-sm text-muted">กำลังโหลดผังร้าน…</p>
+            ) : (
+              <FloorCanvas className="mt-3 -mx-4 px-4" minWidth={560}>
+                {floor.data.decor.map((d) => (
+                  <DecorBox key={d.id} d={d} />
+                ))}
+                {floor.data.tables.map((t) => (
+                  <TableBox
+                    key={t.id}
+                    t={t}
+                    tone={t.id === tableId ? "selected" : t.state === "free" ? "free" : t.state === "taken" ? "taken" : "muted"}
+                    sub={t.state === "taken" ? "จองแล้ว" : undefined}
+                    disabled={t.state !== "free"}
+                    onClick={() => setTableId(t.id)}
+                  />
+                ))}
+              </FloorCanvas>
+            )}
+            <p className="mt-2 text-center text-[11px] text-muted">← เลื่อนดูผังด้านข้างได้ →</p>
+            {table && (
+              <div className="card mt-3 flex items-center gap-3 p-3 animate-pop">
+                <span className={`grid h-12 w-12 place-items-center bg-sun font-display text-brand-deep ${table.shape === "round" ? "rounded-full" : "rounded-xl"}`}>
+                  {table.code}
+                </span>
+                <div className="text-sm">
+                  <div className="font-semibold">โต๊ะ {table.code} · {table.seats} ที่นั่ง</div>
+                  <div className="text-muted">{table.zone === "canal" ? "🌙 ลานริมคลอง" : "🏮 ในร้าน"}</div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {step === "who" && (
           <>
             <section className="card mt-4 p-4 flex items-center gap-4">
               <div className="arch pattern-bg h-16 w-14 shrink-0 border-2 border-sun" />
               <div>
                 <div className="font-display text-lg text-brand-deep">{thaiDate(date, true)} · {time} น.</div>
-                <div className="text-sm text-muted">{party} ท่าน · {zone === "canal" ? "ริมคลอง" : "ในร้าน"} · นั่งได้ 2 ชม.</div>
+                <div className="text-sm text-muted">{party} ท่าน · โต๊ะ {table?.code} ({table?.zone === "canal" ? "ริมคลอง" : "ในร้าน"}) · นั่งได้ 2 ชม.</div>
               </div>
             </section>
 
@@ -202,11 +255,15 @@ function BookFlow() {
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-cream/95 backdrop-blur px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="mx-auto max-w-md">
           {step === "when" ? (
-            <button className="btn btn-primary w-full text-lg" disabled={!time} onClick={() => setStep("who")}>
-              {time ? `ถัดไป · ${time} น.` : "เลือกเวลา"}
+            <button className="btn btn-primary w-full text-lg" disabled={!time} onClick={() => setStep("table")}>
+              {time ? `ถัดไป: เลือกโต๊ะ · ${time} น.` : "เลือกเวลา"}
+            </button>
+          ) : step === "table" ? (
+            <button className="btn btn-primary w-full text-lg" disabled={!table} onClick={() => setStep("who")}>
+              {table ? `จองโต๊ะ ${table.code}` : "แตะเลือกโต๊ะบนผัง"}
             </button>
           ) : (
-            <button className="btn btn-sun w-full text-lg" disabled={busy || !name.trim() || phone.replace(/\D/g, "").length < 9} onClick={submit}>
+            <button className="btn btn-sun w-full text-lg" disabled={busy || !table || !name.trim() || phone.replace(/\D/g, "").length < 9} onClick={submit}>
               {busy ? "กำลังจอง…" : "ยืนยันการจอง"}
             </button>
           )}

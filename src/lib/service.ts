@@ -8,11 +8,13 @@ import {
   bangkokNow,
   bookingSlots,
   CLOSE_TIME,
+  FLOOR_COLS,
+  FLOOR_ROWS,
   itemsTotal,
   OPEN_TIME,
   promptPayPayload,
-  remainingCapacity,
   resolveOptions,
+  tableStates,
   toMinutes,
   unitPrice,
 } from "./logic";
@@ -21,12 +23,13 @@ import type {
   BookingStatus,
   CartLine,
   DiningSession,
+  FloorDecor,
   ItemStatus,
   Order,
   OrderItem,
   Payment,
   Station,
-  Zone,
+  Table,
 } from "./types";
 
 const bad = (msg: string) => new HttpError(400, msg);
@@ -95,14 +98,16 @@ export async function upsertCustomer(p: { userId: string; displayName: string; p
 
 export async function myActivity(userId: string) {
   const today = bangkokNow().date;
-  const [bookings, orders] = await Promise.all([
+  const [bookings, orders, tables] = await Promise.all([
     db().list("bookings", { line_user_id: userId }),
     db().list("orders", { line_user_id: userId, type: "takeaway" }),
+    db().list("tables"),
   ]);
   return {
     bookings: bookings
       .filter((b) => b.date >= today && ["pending", "confirmed"].includes(b.status))
-      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)),
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+      .map((b) => ({ ...b, table_code: tables.find((t) => t.id === b.table_id)?.code ?? null })),
     takeaways: orders
       .filter((o) => !["picked_up", "cancelled"].includes(o.status))
       .sort((a, b) => b.created_at.localeCompare(a.created_at)),
@@ -111,9 +116,8 @@ export async function myActivity(userId: string) {
 
 /* ------------------------------------------------------------- bookings --- */
 
-function checkBookingInput(q: { date: string; time?: string; partySize: number; zone: Zone }) {
+function checkBookingInput(q: { date: string; time?: string; partySize: number }) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(q.date)) throw bad("วันที่ไม่ถูกต้อง");
-  if (!["indoor", "canal"].includes(q.zone)) throw bad("โซนไม่ถูกต้อง");
   if (!(q.partySize >= 1 && q.partySize <= 20)) throw bad("จำนวนคน 1–20 ท่าน");
   const now = bangkokNow();
   if (q.date < now.date) throw bad("เลือกวันที่ผ่านมาแล้วไม่ได้");
@@ -124,22 +128,35 @@ function checkBookingInput(q: { date: string; time?: string; partySize: number; 
   }
 }
 
-export async function availability(q: { date: string; partySize: number; zone: Zone }) {
-  checkBookingInput(q);
-  const [tables, bookings] = await Promise.all([db().list("tables"), db().list("bookings", { date: q.date })]);
+const tooSoon = (date: string, time: string) => {
   const now = bangkokNow();
+  return date === now.date && toMinutes(time) < toMinutes(now.time) + 30;
+};
+
+/** For each booking slot: how many tables suit the party and are still free. */
+export async function availability(q: { date: string; partySize: number }) {
+  checkBookingInput(q);
+  const [tables, bookings] = await Promise.all([db().list("tables", { active: true }), db().list("bookings", { date: q.date })]);
   return bookingSlots().map((time) => ({
     time,
-    left:
-      q.date === now.date && toMinutes(time) < toMinutes(now.time) + 30
-        ? 0
-        : remainingCapacity(tables, bookings, { ...q, time }),
+    left: tooSoon(q.date, time) ? 0 : tableStates(tables, bookings, { ...q, time }).filter((t) => t.state === "free").length,
   }));
+}
+
+/** Floor plan coloured for a party at date/time — what the customer picks from. */
+export async function bookingFloor(q: { date: string; time: string; partySize: number }) {
+  checkBookingInput(q);
+  const [tables, decor, bookings] = await Promise.all([
+    db().list("tables", { active: true }),
+    db().list("floor_decor"),
+    db().list("bookings", { date: q.date }),
+  ]);
+  return { tables: tableStates(tables, bookings, q), decor };
 }
 
 export async function createBooking(
   userId: string,
-  input: { name: string; phone: string; partySize: number; date: string; time: string; zone: Zone; note?: string; preorder?: CartLine[] },
+  input: { name: string; phone: string; partySize: number; date: string; time: string; tableId: string; note?: string; preorder?: CartLine[] },
 ) {
   const name = String(input.name ?? "").trim();
   const phone = String(input.phone ?? "").replace(/[^0-9]/g, "");
@@ -148,9 +165,12 @@ export async function createBooking(
   const partySize = Number(input.partySize);
   checkBookingInput({ ...input, partySize });
 
-  const [tables, bookings] = await Promise.all([db().list("tables"), db().list("bookings", { date: input.date })]);
-  if (remainingCapacity(tables, bookings, { ...input, partySize }) < 1)
-    throw new HttpError(409, "ช่วงเวลานี้เต็มแล้ว ลองเลือกเวลาอื่นนะคะ");
+  const table = await db().get("tables", String(input.tableId));
+  if (!table || !table.active) throw bad("กรุณาเลือกโต๊ะจากผังร้าน");
+  const bookings = await db().list("bookings", { date: input.date });
+  const state = tableStates([table], bookings, { ...input, partySize })[0].state;
+  if (state === "taken") throw new HttpError(409, `โต๊ะ ${table.code} เพิ่งถูกจองไปค่ะ ลองเลือกโต๊ะอื่นนะคะ`);
+  if (state === "unfit") throw bad(`โต๊ะ ${table.code} มี ${table.seats} ที่นั่ง ไม่เหมาะกับ ${partySize} ท่าน`);
 
   const booking: Booking = {
     id: newId(),
@@ -160,10 +180,10 @@ export async function createBooking(
     party_size: partySize,
     date: input.date,
     time: input.time,
-    zone: input.zone,
+    zone: table.zone,
     note: String(input.note ?? "").slice(0, 300),
     status: "pending",
-    table_id: null,
+    table_id: table.id,
     created_at: nowIso(),
   };
 
@@ -185,14 +205,21 @@ export async function createBooking(
     preorderItems = await buildItems(order.id, input.preorder, "held");
   }
 
-  await db().insert("bookings", booking);
+  try {
+    await db().insert("bookings", booking);
+  } catch (e) {
+    // Supabase's exclusion constraint caught a booking that slipped in after our check.
+    if (String((e as Error).message).includes("bookings_no_overlap"))
+      throw new HttpError(409, `โต๊ะ ${table.code} เพิ่งถูกจองไปค่ะ ลองเลือกโต๊ะอื่นนะคะ`);
+    throw e;
+  }
   if (order) {
     await db().insert("orders", order);
     await insertItems(preorderItems);
   }
 
   notifyStaff(
-    `📅 จองโต๊ะใหม่ (รอยืนยัน)\n${name} ${partySize} ท่าน\n${input.date} ${input.time} · ${input.zone === "canal" ? "ริมคลอง" : "ในร้าน"}` +
+    `📅 จองโต๊ะใหม่ (รอยืนยัน)\n${name} ${partySize} ท่าน · โต๊ะ ${table.code}\n${input.date} ${input.time} · ${table.zone === "canal" ? "ริมคลอง" : "ในร้าน"}` +
       (preorderItems.length ? `\nสั่งล่วงหน้า:\n${summarize(preorderItems)}` : ""),
   );
   return booking;
@@ -291,7 +318,7 @@ async function openSession(tableId: string, bookingId: string | null): Promise<D
 
 /** A guest scanned the QR on a table. */
 export async function joinTable(tableCode: string, key: string) {
-  const [table] = await db().list("tables", { code: tableCode.toUpperCase() });
+  const [table] = await db().list("tables", { code: tableCode.toUpperCase(), active: true });
   if (!table || key !== tableKey(table.code)) throw notFound("โต๊ะนี้ กรุณาสแกน QR ที่โต๊ะอีกครั้ง");
   const session = await openSession(table.id, null);
   return { table, session };
@@ -579,18 +606,26 @@ export async function setMenuAvailability(id: string, isAvailable: boolean) {
 /* ------------------------------------------------------------- cashier --- */
 
 export async function cashierBoard() {
-  const [tables, sessions, pending, takeaways] = await Promise.all([
-    db().list("tables"),
+  const now = bangkokNow();
+  const [tables, decor, sessions, pending, takeaways, todaysBookings] = await Promise.all([
+    db().list("tables", { active: true }),
+    db().list("floor_decor"),
     db().list("dining_sessions", { status: ["open", "bill_requested"] }),
     db().list("payments", { status: "pending" }),
     db().list("orders", { type: "takeaway", status: ["awaiting_payment", "placed", "ready"] }),
+    db().list("bookings", { date: now.date, status: ["pending", "confirmed"] }),
   ]);
+  // Bookings still to arrive today (or up to 30 min late), earliest first.
+  const upcoming = todaysBookings
+    .filter((b) => toMinutes(b.time) >= toMinutes(now.time) - 30)
+    .sort((a, b) => a.time.localeCompare(b.time));
   const orders = await db().list("orders", { session_id: sessions.map((s) => s.id) });
   const allOrderIds = [...orders, ...takeaways].map((o) => o.id);
   const items = await db().list("order_items", { order_id: allOrderIds });
   const totalOf = (orderIds: string[]) => itemsTotal(items.filter((i) => orderIds.includes(i.order_id)));
 
   return {
+    decor,
     tables: tables
       .sort((a, b) => a.code.localeCompare(b.code))
       .map((t) => {
@@ -604,6 +639,7 @@ export async function cashierBoard() {
           waiting: its.filter((i) => ["queued", "cooking"].includes(i.status)).length,
           toServe: its.filter((i) => i.status === "ready").length,
           pendingPayment: s ? pending.some((p) => p.target_id === s.id) : false,
+          nextBooking: upcoming.find((b) => b.table_id === t.id) ?? null,
         };
       }),
     payments: await Promise.all(
@@ -628,7 +664,7 @@ export async function cashierBoard() {
 }
 
 export async function tableQrs() {
-  const tables = await db().list("tables");
+  const tables = await db().list("tables", { active: true });
   return tables
     .sort((a, b) => a.code.localeCompare(b.code))
     .map((t) => ({ ...t, path: `/liff/t/${t.code}/${tableKey(t.code)}` }));
@@ -636,6 +672,86 @@ export async function tableQrs() {
 
 export async function staffOpenTable(tableId: string) {
   return openSession(tableId, null);
+}
+
+/* ----------------------------------------------------------- floor plan --- */
+
+export async function floorPlan() {
+  const [tables, decor] = await Promise.all([db().list("tables", { active: true }), db().list("floor_decor")]);
+  return { tables, decor };
+}
+
+type TableInput = Pick<Table, "id" | "code" | "zone" | "seats" | "x" | "y" | "w" | "h" | "shape">;
+type DecorInput = Pick<FloorDecor, "id" | "kind" | "label" | "x" | "y" | "w" | "h">;
+
+function cleanBox(r: { x: unknown; y: unknown; w: unknown; h: unknown }) {
+  const n = (v: unknown) => Math.round(Number(v));
+  const box = { x: n(r.x), y: n(r.y), w: n(r.w), h: n(r.h) };
+  if (!(box.w >= 1 && box.h >= 1 && box.x >= 0 && box.y >= 0 && box.x + box.w <= FLOOR_COLS && box.y + box.h <= FLOOR_ROWS))
+    throw bad("มีชิ้นที่อยู่นอกผัง");
+  return box;
+}
+
+const DECOR_KINDS = ["area", "canal", "stage", "screen", "counter", "kitchen", "entrance"];
+
+/**
+ * Replace the floor plan with what the editor sends. Tables left out are
+ * hidden (not deleted) unless something still depends on them.
+ */
+export async function saveFloorPlan(input: { tables: TableInput[]; decor: DecorInput[] }) {
+  if (!Array.isArray(input.tables) || !Array.isArray(input.decor)) throw bad("ข้อมูลผังไม่ถูกต้อง");
+
+  const tables = input.tables.map((t) => {
+    const code = String(t.code ?? "").trim().toUpperCase().slice(0, 6);
+    if (!/^[A-Z0-9-]+$/.test(code)) throw bad(`รหัสโต๊ะ "${t.code}" ใช้ได้เฉพาะ A-Z และตัวเลข`);
+    const seats = Math.round(Number(t.seats));
+    if (!(seats >= 1 && seats <= 20)) throw bad(`โต๊ะ ${code}: ที่นั่ง 1–20`);
+    if (!["indoor", "canal"].includes(t.zone)) throw bad(`โต๊ะ ${code}: โซนไม่ถูกต้อง`);
+    if (!["round", "square"].includes(t.shape)) throw bad(`โต๊ะ ${code}: ทรงไม่ถูกต้อง`);
+    return { id: String(t.id ?? ""), code, seats, zone: t.zone, shape: t.shape, ...cleanBox(t) };
+  });
+  const dup = tables.find((t, i) => tables.findIndex((x) => x.code === t.code) !== i);
+  if (dup) throw bad(`รหัสโต๊ะ ${dup.code} ซ้ำกัน`);
+
+  const decor = input.decor.map((d) => {
+    if (!DECOR_KINDS.includes(d.kind)) throw bad("ประเภทสิ่งตกแต่งไม่ถูกต้อง");
+    return { id: String(d.id ?? ""), kind: d.kind, label: String(d.label ?? "").slice(0, 30), ...cleanBox(d) };
+  });
+
+  const current = await db().list("tables", { active: true });
+  const keepIds = new Set(tables.map((t) => t.id));
+  const removed = current.filter((t) => !keepIds.has(t.id));
+  if (removed.length) {
+    const today = bangkokNow().date;
+    const [sessions, bookings] = await Promise.all([
+      db().list("dining_sessions", { table_id: removed.map((t) => t.id), status: ["open", "bill_requested"] }),
+      db().list("bookings", { table_id: removed.map((t) => t.id), status: ["pending", "confirmed"] }),
+    ]);
+    const blockers = removed.flatMap((t) => {
+      if (sessions.some((s) => s.table_id === t.id)) return [`โต๊ะ ${t.code} มีลูกค้านั่งอยู่`];
+      const b = bookings.find((x) => x.table_id === t.id && x.date >= today);
+      return b ? [`โต๊ะ ${t.code} มีจอง ${b.date} ${b.time} (${b.name})`] : [];
+    });
+    if (blockers.length) throw new HttpError(409, `ลบไม่ได้: ${blockers.join(", ")}`);
+  }
+
+  // Hide removed tables first so their codes are free for renamed/new tables.
+  for (const t of removed) await db().update("tables", t.id, { active: false });
+  for (const t of tables) {
+    const { id, ...fields } = t;
+    if (current.some((c) => c.id === id)) await db().update("tables", id, fields);
+    else await db().insert("tables", { ...fields, id: newId(), active: true });
+  }
+
+  const currentDecor = await db().list("floor_decor");
+  const keepDecor = new Set(decor.map((d) => d.id));
+  for (const d of currentDecor) if (!keepDecor.has(d.id)) await db().remove("floor_decor", d.id);
+  for (const d of decor) {
+    const { id, ...fields } = d;
+    if (currentDecor.some((c) => c.id === id)) await db().update("floor_decor", id, fields);
+    else await db().insert("floor_decor", { ...fields, id: newId() });
+  }
+  return floorPlan();
 }
 
 /* ---------------------------------------------------------------- admin --- */

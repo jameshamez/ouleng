@@ -5,7 +5,7 @@ import { useApi } from "@/lib/client";
 import type { Booking, MenuItem, Order } from "@/lib/types";
 import { baht, FoodArt, thaiDate } from "@/components/ui";
 
-type Me = { profile: { displayName: string; pictureUrl: string | null }; bookings: Booking[]; takeaways: Order[] };
+type Me = { profile: { displayName: string; pictureUrl: string | null }; bookings: (Booking & { table_code: string | null })[]; takeaways: Order[] };
 
 const ORDER_LABEL: Record<string, string> = {
   awaiting_payment: "รอชำระเงิน",
@@ -89,7 +89,7 @@ export default function LiffHome() {
                   <div className="font-semibold text-sm">
                     {thaiDate(b.date, true)} · {b.time} น. · {b.party_size} ท่าน
                   </div>
-                  <div className="text-xs text-muted">{b.zone === "canal" ? "ริมคลอง" : "ในร้าน"}</div>
+                  <div className="text-xs text-muted">{b.table_code ? `โต๊ะ ${b.table_code} · ` : ""}{b.zone === "canal" ? "ริมคลอง" : "ในร้าน"}</div>
                 </div>
                 <span className={`chip ${b.status === "confirmed" ? "bg-brand-soft text-brand-deep" : "bg-sun-soft text-sun-ink"}`}>
                   {b.status === "confirmed" ? "ยืนยันแล้ว" : "รอร้านยืนยัน"}

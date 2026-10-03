@@ -39,6 +39,10 @@ export function createSupabaseDb(): Db {
       fail(error);
       return data as never;
     },
+    async remove(table, id) {
+      const { error } = await sb.from(table).delete().eq("id", id);
+      fail(error);
+    },
     async upload(name, bytes, contentType) {
       const { error } = await sb.storage.from(BUCKET).upload(name, bytes, { contentType });
       fail(error);

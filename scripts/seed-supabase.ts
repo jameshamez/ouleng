@@ -1,7 +1,7 @@
 // Load the starter menu + tables into Supabase (safe to re-run: upserts by id).
 // Usage: npm run seed   (reads SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY from .env.local)
 import { createClient } from "@supabase/supabase-js";
-import { seedCategories, seedMenuItems, seedTables } from "../src/lib/seed";
+import { seedCategories, seedDecor, seedMenuItems, seedTables } from "../src/lib/seed";
 
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -15,6 +15,7 @@ for (const [table, rows] of [
   ["menu_categories", seedCategories],
   ["menu_items", seedMenuItems],
   ["tables", seedTables],
+  ["floor_decor", seedDecor],
 ] as const) {
   const { error } = await sb.from(table).upsert(rows as never, { onConflict: "id", ignoreDuplicates: true });
   if (error) {

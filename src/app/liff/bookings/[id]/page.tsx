@@ -9,7 +9,7 @@ import type { Booking } from "@/lib/types";
 
 export default function BookingDetail() {
   const { id } = useParams<{ id: string }>();
-  const { data, error, mutate } = useApi<{ bookings: Booking[] }>("me", undefined, { refreshInterval: 8000 });
+  const { data, error, mutate } = useApi<{ bookings: (Booking & { table_code: string | null })[] }>("me", undefined, { refreshInterval: 8000 });
   const [busy, setBusy] = useState(false);
   const b = data?.bookings.find((x) => x.id === id);
 
@@ -43,6 +43,7 @@ export default function BookingDetail() {
               <div className="font-display text-3xl mt-3">{b.time} น.</div>
               <div className="mt-1">{thaiDate(b.date, true)}</div>
               <div className="my-4 h-px bg-sun/50" />
+              {b.table_code && <div className="mx-auto mb-2 w-fit rounded-full bg-sun px-4 py-1 font-display text-lg text-brand-deep">โต๊ะ {b.table_code}</div>}
               <div className="text-sm">คุณ{b.name}</div>
               <div className="text-sm text-brand-soft">{b.party_size} ท่าน · {b.zone === "canal" ? "ริมคลอง" : "ในร้าน"}</div>
             </div>

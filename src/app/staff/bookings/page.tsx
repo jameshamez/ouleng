@@ -110,7 +110,13 @@ function SeatSheet({ booking, onClose, onDone }: { booking: Row | null; onClose:
   const { data } = useApi<Board>(booking ? "cashier" : null);
   const [busy, setBusy] = useState(false);
   if (!booking) return null;
-  const tables = (data?.tables ?? []).sort((a, b) => Number(b.zone === booking.zone) - Number(a.zone === booking.zone) || a.seats - b.seats);
+  // The table the guest picked comes first, then the rest of their zone, smallest first.
+  const tables = (data?.tables ?? []).sort(
+    (a, b) =>
+      Number(b.id === booking.table_id) - Number(a.id === booking.table_id) ||
+      Number(b.zone === booking.zone) - Number(a.zone === booking.zone) ||
+      a.seats - b.seats,
+  );
 
   const seat = async (tableId: string) => {
     setBusy(true);
@@ -127,7 +133,10 @@ function SeatSheet({ booking, onClose, onDone }: { booking: Row | null; onClose:
   return (
     <Sheet open onClose={onClose} title={`พาคุณ${booking.name} (${booking.party_size} ท่าน) เข้าโต๊ะ`}>
       <div className="px-5 pb-6">
-        <p className="text-sm text-muted">เลือกโต๊ะว่าง {booking.preorder.length > 0 && "· อาหารที่สั่งล่วงหน้าจะเข้าครัวทันที"}</p>
+        <p className="text-sm text-muted">
+          {booking.table_code ? `ลูกค้าจองโต๊ะ ${booking.table_code} ไว้ (สีเหลือง) · เปลี่ยนโต๊ะได้ถ้าจำเป็น` : "เลือกโต๊ะว่าง"}
+          {booking.preorder.length > 0 && " · อาหารที่สั่งล่วงหน้าจะเข้าครัวทันที"}
+        </p>
         {!data ? (
           <Spinner />
         ) : (
@@ -140,10 +149,12 @@ function SeatSheet({ booking, onClose, onDone }: { booking: Row | null; onClose:
                   key={t.id}
                   disabled={busy || busyTable}
                   onClick={() => seat(t.id)}
-                  className={`arch border-2 pt-4 pb-2 text-center disabled:opacity-30 ${t.zone === booking.zone ? "border-brand" : "border-line"} ${small ? "bg-peach-soft" : "bg-paper"}`}
+                  className={`arch border-2 pt-4 pb-2 text-center disabled:opacity-30 ${
+                    t.id === booking.table_id ? "border-brand-deep bg-sun" : t.zone === booking.zone ? "border-brand" : "border-line"
+                  } ${t.id !== booking.table_id ? (small ? "bg-peach-soft" : "bg-paper") : ""}`}
                 >
                   <div className="font-display text-brand-deep">{t.code}</div>
-                  <div className="text-[11px] text-muted">{t.seats} ที่</div>
+                  <div className="text-[11px] text-muted">{t.id === booking.table_id ? "ที่จองไว้" : `${t.seats} ที่`}</div>
                 </button>
               );
             })}

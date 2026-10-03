@@ -2,6 +2,7 @@
 
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
+import { FloorEditor } from "@/components/FloorEditor";
 import { baht, Emblem, FoodArt, Spinner } from "@/components/ui";
 import { api, LIFF_ID, useApi } from "@/lib/client";
 import type { MenuCategory, MenuItem, Table } from "@/lib/types";
@@ -9,11 +10,11 @@ import type { MenuCategory, MenuItem, Table } from "@/lib/types";
 type Sales = { total: number; count: number; promptpay: number; cash: number };
 
 export default function AdminPage() {
-  const [tab, setTab] = useState<"menu" | "qr">("menu");
+  const [tab, setTab] = useState<"menu" | "floor" | "qr">("menu");
   const { data: sales } = useApi<Sales>("sales", undefined, { refreshInterval: 15_000 });
 
   return (
-    <main className="p-4 max-w-5xl mx-auto">
+    <main className="p-4 max-w-6xl mx-auto">
       <section className="no-print grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "ยอดขายวันนี้", value: sales ? baht(sales.total) : "…", big: true },
@@ -32,12 +33,15 @@ export default function AdminPage() {
         <button onClick={() => setTab("menu")} className={`rounded-full px-4 py-2 text-sm ${tab === "menu" ? "bg-brand text-white" : "bg-paper border border-line"}`}>
           🍽 จัดการเมนู
         </button>
+        <button onClick={() => setTab("floor")} className={`rounded-full px-4 py-2 text-sm ${tab === "floor" ? "bg-brand text-white" : "bg-paper border border-line"}`}>
+          🗺 ผังร้าน
+        </button>
         <button onClick={() => setTab("qr")} className={`rounded-full px-4 py-2 text-sm ${tab === "qr" ? "bg-brand text-white" : "bg-paper border border-line"}`}>
           🔳 QR ประจำโต๊ะ
         </button>
       </div>
 
-      {tab === "menu" ? <MenuEditor /> : <TableQrs />}
+      {tab === "menu" ? <MenuEditor /> : tab === "floor" ? <FloorEditor /> : <TableQrs />}
     </main>
   );
 }

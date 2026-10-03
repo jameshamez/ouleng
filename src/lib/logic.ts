@@ -1,12 +1,5 @@
 import generatePayload from "promptpay-qr";
-import type {
-  Booking,
-  MenuItem,
-  OrderItem,
-  SelectedOption,
-  Table,
-  Zone,
-} from "./types";
+import type { Booking, MenuItem, OrderItem, SelectedOption, Table } from "./types";
 
 export const OPEN_TIME = "12:00";
 export const CLOSE_TIME = "24:00"; // kitchen last order 23:30 (see pickupSlots)
@@ -30,36 +23,43 @@ export function bookingSlots(): string[] {
   return out;
 }
 
-const ACTIVE_BOOKING = new Set(["pending", "confirmed", "seated"]);
+export const ACTIVE_BOOKING = new Set(["pending", "confirmed", "seated"]);
 
-/**
- * How many more bookings of `partySize` the zone can take at date/time.
- * Each overlapping booking is assumed to occupy one table that fits it.
- */
-export function remainingCapacity(
+/** Floor plan grid size, in cells. Table/decor positions are stored in these units. */
+export const FLOOR_COLS = 24;
+export const FLOOR_ROWS = 18;
+
+/** Biggest spare capacity we hand out, so 2 guests don't take the 8-seater. */
+export const MAX_SPARE_SEATS = 3;
+
+export const tableFits = (seats: number, partySize: number) => seats >= partySize && seats <= partySize + MAX_SPARE_SEATS;
+
+export type TableState = "free" | "taken" | "unfit";
+
+/** Per-table booking state for a party at date/time (active tables only). */
+export function tableStates(
   tables: Table[],
   bookings: Booking[],
-  q: { date: string; time: string; zone: Zone; partySize: number },
-): number {
+  q: { date: string; time: string; partySize: number },
+): (Table & { state: TableState })[] {
   const start = toMinutes(q.time);
-  const overlapping = bookings.filter(
-    (b) =>
-      ACTIVE_BOOKING.has(b.status) &&
-      b.date === q.date &&
-      b.zone === q.zone &&
-      Math.abs(toMinutes(b.time) - start) < BOOKING_MINUTES,
+  const takenIds = new Set(
+    bookings
+      .filter(
+        (b) =>
+          b.table_id &&
+          ACTIVE_BOOKING.has(b.status) &&
+          b.date === q.date &&
+          Math.abs(toMinutes(b.time) - start) < BOOKING_MINUTES,
+      )
+      .map((b) => b.table_id),
   );
-  const fitting = tables
-    .filter((t) => t.zone === q.zone && t.seats >= q.partySize)
-    .sort((a, b) => a.seats - b.seats);
-  // Greedily give each overlapping booking the smallest table that fits it.
-  const pool = tables.filter((t) => t.zone === q.zone).sort((a, b) => a.seats - b.seats);
-  const used = new Set<string>();
-  for (const b of [...overlapping].sort((a, c) => c.party_size - a.party_size)) {
-    const t = pool.find((x) => !used.has(x.id) && x.seats >= b.party_size) ?? pool.find((x) => !used.has(x.id));
-    if (t) used.add(t.id);
-  }
-  return fitting.filter((t) => !used.has(t.id)).length;
+  return tables
+    .filter((t) => t.active)
+    .map((t) => ({
+      ...t,
+      state: takenIds.has(t.id) ? "taken" : tableFits(t.seats, q.partySize) ? "free" : "unfit",
+    }));
 }
 
 /**

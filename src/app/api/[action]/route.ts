@@ -28,7 +28,11 @@ const actions: Record<string, { who: Who; run: (c: Ctx) => Promise<unknown> }> =
   },
   availability: {
     who: "public",
-    run: ({ body }) => svc.availability({ date: body.date, partySize: Number(body.partySize), zone: body.zone }),
+    run: ({ body }) => svc.availability({ date: body.date, partySize: Number(body.partySize) }),
+  },
+  bookingFloor: {
+    who: "public",
+    run: ({ body }) => svc.bookingFloor({ date: body.date, time: body.time, partySize: Number(body.partySize) }),
   },
   createBooking: { who: "customer", run: ({ body, customer }) => svc.createBooking(customer!.userId, body as never) },
   cancelBooking: { who: "customer", run: ({ body, customer }) => svc.cancelMyBooking(customer!.userId, body.id) },
@@ -80,6 +84,8 @@ const actions: Record<string, { who: Who; run: (c: Ctx) => Promise<unknown> }> =
   seatBooking: { who: FRONT, run: ({ body }) => svc.seatBooking(String(body.id), String(body.tableId)) },
   sales: { who: ["admin"], run: () => svc.salesToday() },
   tableQrs: { who: FRONT, run: () => svc.tableQrs() },
+  floorPlan: { who: FRONT, run: () => svc.floorPlan() },
+  saveFloorPlan: { who: ["admin"], run: ({ body }) => svc.saveFloorPlan(body as never) },
   updateMenuItem: { who: ["admin"], run: ({ body }) => svc.updateMenuItem(String(body.id), body.patch ?? {}) },
 };
 
