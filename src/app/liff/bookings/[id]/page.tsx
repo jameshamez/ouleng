@@ -38,19 +38,19 @@ export default function BookingDetail() {
         )}
         {b && (
           <section className="mt-6 text-center">
-            <div className="arch mx-auto w-64 bg-teal text-cream px-6 pt-10 pb-7 border-4 border-gold shadow-xl animate-pop">
-              <div className="text-xs tracking-widest text-gold-soft">อูเล้งคาเฟ่ · RESERVATION</div>
+            <div className="arch mx-auto w-64 bg-brand text-cream px-6 pt-10 pb-7 border-4 border-sun shadow-xl animate-pop">
+              <div className="text-xs tracking-widest text-sun-soft">อูเล้งคาเฟ่ · RESERVATION</div>
               <div className="font-display text-3xl mt-3">{b.time} น.</div>
               <div className="mt-1">{thaiDate(b.date, true)}</div>
-              <div className="my-4 h-px bg-gold/50" />
+              <div className="my-4 h-px bg-sun/50" />
               <div className="text-sm">คุณ{b.name}</div>
-              <div className="text-sm text-mint-soft">{b.party_size} ท่าน · {b.zone === "canal" ? "ริมคลอง" : "ในร้าน"}</div>
+              <div className="text-sm text-brand-soft">{b.party_size} ท่าน · {b.zone === "canal" ? "ริมคลอง" : "ในร้าน"}</div>
             </div>
             <div className="mt-5">
               {b.status === "confirmed" ? (
-                <span className="chip bg-mint-soft text-teal-deep text-sm px-4 py-1.5">✓ ร้านยืนยันแล้ว</span>
+                <span className="chip bg-brand-soft text-brand-deep text-sm px-4 py-1.5">✓ ร้านยืนยันแล้ว</span>
               ) : (
-                <span className="chip bg-gold-soft text-[#8a6418] text-sm px-4 py-1.5">⏳ รอร้านยืนยัน · จะแจ้งทาง LINE</span>
+                <span className="chip bg-sun-soft text-sun-ink text-sm px-4 py-1.5">⏳ รอร้านยืนยัน · จะแจ้งทาง LINE</span>
               )}
             </div>
             {b.note && <p className="mt-3 text-sm text-muted">หมายเหตุ: {b.note}</p>}

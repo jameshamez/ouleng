@@ -41,7 +41,7 @@ function DemoUserSwitch() {
           {DEMO_USERS.map((u) => (
             <button
               key={u.userId}
-              className={`block w-full rounded-xl px-2 py-1.5 text-left text-sm ${u.userId === me.userId ? "bg-mint-soft font-semibold" : "hover:bg-sand"}`}
+              className={`block w-full rounded-xl px-2 py-1.5 text-left text-sm ${u.userId === me.userId ? "bg-brand-soft font-semibold" : "hover:bg-sand"}`}
               onClick={() => {
                 setDemoUser(u);
                 window.location.reload();

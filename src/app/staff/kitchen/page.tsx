@@ -9,9 +9,9 @@ import type { ItemStatus, MenuItem, OrderItem, Station } from "@/lib/types";
 type KItem = OrderItem & { label: string; kind: "dine_in" | "takeaway"; pickup: string | null };
 
 const COLS: { status: ItemStatus; title: string; tint: string; next: ItemStatus; action: string }[] = [
-  { status: "queued", title: "ออเดอร์ใหม่", tint: "bg-gold-soft", next: "cooking", action: "เริ่มทำ" },
-  { status: "cooking", title: "กำลังทำ", tint: "bg-coral-soft", next: "ready", action: "เสร็จแล้ว" },
-  { status: "ready", title: "รอเสิร์ฟ / รอรับ", tint: "bg-mint-soft", next: "served", action: "เสิร์ฟแล้ว" },
+  { status: "queued", title: "ออเดอร์ใหม่", tint: "bg-sun-soft", next: "cooking", action: "เริ่มทำ" },
+  { status: "cooking", title: "กำลังทำ", tint: "bg-peach-soft", next: "ready", action: "เสร็จแล้ว" },
+  { status: "ready", title: "รอเสิร์ฟ / รอรับ", tint: "bg-brand-soft", next: "served", action: "เสิร์ฟแล้ว" },
 ];
 
 function minutesAgo(iso: string, now: number) {
@@ -66,14 +66,14 @@ export default function KitchenPage() {
   return (
     <main className="p-4">
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <h1 className="font-display text-2xl text-teal-deep mr-2">จอครัว</h1>
+        <h1 className="font-display text-2xl text-brand-deep mr-2">จอครัว</h1>
         {!fixed &&
           (["all", "somtam", "cafe"] as const).map((s) => (
-            <button key={s} onClick={() => setStation(s)} className={`rounded-full px-4 py-1.5 text-sm ${station === s ? "bg-teal text-white" : "bg-paper border border-line"}`}>
+            <button key={s} onClick={() => setStation(s)} className={`rounded-full px-4 py-1.5 text-sm ${station === s ? "bg-brand text-white" : "bg-paper border border-line"}`}>
               {s === "all" ? "ทั้งหมด" : s === "somtam" ? "🥗 ครัวส้มตำ" : "🧋 คาเฟ่"}
             </button>
           ))}
-        {fixed && <span className="chip bg-teal text-white text-sm px-3 py-1">{station === "somtam" ? "🥗 ครัวส้มตำ" : "🧋 เคาน์เตอร์คาเฟ่"}</span>}
+        {fixed && <span className="chip bg-brand text-white text-sm px-3 py-1">{station === "somtam" ? "🥗 ครัวส้มตำ" : "🧋 เคาน์เตอร์คาเฟ่"}</span>}
         <button className="btn btn-ghost ml-auto py-2 text-sm" onClick={() => setStockOpen(true)}>
           🚫 ของหมด
         </button>
@@ -96,7 +96,7 @@ export default function KitchenPage() {
                     const age = minutesAgo(t.items[0].created_at, now);
                     return (
                       <article key={t.orderId} className={`card overflow-hidden animate-pop ${age >= 15 && col.status !== "ready" ? "ring-2 ring-red" : ""}`}>
-                        <header className={`flex items-center justify-between px-4 py-2 ${t.kind === "takeaway" ? "bg-gold text-white" : "bg-teal text-white"}`}>
+                        <header className={`flex items-center justify-between px-4 py-2 ${t.kind === "takeaway" ? "bg-sun text-brand-deep" : "bg-brand text-white"}`}>
                           <span className="font-display text-lg">{t.label}</span>
                           <span className="text-sm opacity-90">
                             {t.pickup ? `รับ ${t.pickup} · ` : ""}
@@ -112,7 +112,7 @@ export default function KitchenPage() {
                                   {i.name}
                                   {station === "all" && <span className="ml-1 text-xs text-muted">{i.station === "somtam" ? "🥗" : "🧋"}</span>}
                                 </div>
-                                {i.options.length > 0 && <div className="text-sm text-teal-deep">{i.options.map((o) => o.label).join(" · ")}</div>}
+                                {i.options.length > 0 && <div className="text-sm text-brand-deep">{i.options.map((o) => o.label).join(" · ")}</div>}
                                 {i.note && <div className="text-sm text-red">📝 {i.note}</div>}
                               </div>
                               <div className="flex flex-col gap-1">
@@ -177,7 +177,7 @@ function StockSheet({ open, onClose, station }: { open: boolean; onClose: () => 
             <span className={`flex-1 ${i.is_available ? "" : "text-muted line-through"}`}>{i.name}</span>
             <button
               onClick={() => toggle(i)}
-              className={`relative h-7 w-12 rounded-full transition ${i.is_available ? "bg-teal" : "bg-line"}`}
+              className={`relative h-7 w-12 rounded-full transition ${i.is_available ? "bg-brand" : "bg-line"}`}
               aria-label={i.is_available ? "มีของ" : "หมด"}
             >
               <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all ${i.is_available ? "left-[22px]" : "left-0.5"}`} />

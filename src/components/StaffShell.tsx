@@ -39,15 +39,15 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
     <StaffCtx.Provider value={data}>
       <div className="min-h-dvh bg-cream">
         <header className="no-print sticky top-0 z-30 bg-paper/95 backdrop-blur border-b border-line">
-          <div className="flex items-center gap-4 px-4 h-16">
+          <div className="flex items-center gap-3 px-4 h-16">
             <Brand sub={`พนักงาน · ${data.label}`} />
-            <nav className="flex gap-1 ml-4 overflow-x-auto no-scrollbar">
+            <nav className="flex gap-1 ml-2 min-w-0 overflow-x-auto no-scrollbar">
               {nav.map((n) => (
                 <Link
                   key={n.href}
                   href={n.href}
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition ${
-                    path.startsWith(n.href) ? "bg-teal text-white shadow" : "hover:bg-sand"
+                    path.startsWith(n.href) ? "bg-brand text-white shadow" : "hover:bg-sand"
                   }`}
                 >
                   {n.icon} {n.label}
@@ -97,20 +97,20 @@ function PinLogin({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <main className="min-h-dvh tile-bg grid place-items-center p-4">
+    <main className="min-h-dvh pattern-bg grid place-items-center p-4">
       <div className="card w-full max-w-xs p-6 text-center">
         <div className="flex justify-center"><Brand sub="สำหรับพนักงาน" /></div>
         <p className="mt-5 text-sm text-muted">ใส่ PIN</p>
         <div className="mt-2 flex justify-center gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={`h-3.5 w-3.5 rounded-full transition ${i < pin.length ? "bg-teal scale-110" : "bg-line"}`} />
+            <span key={i} className={`h-3.5 w-3.5 rounded-full transition ${i < pin.length ? "bg-brand scale-110" : "bg-line"}`} />
           ))}
         </div>
         <p className="h-5 mt-2 text-sm text-red">{err}</p>
         <div className="mt-2 grid grid-cols-3 gap-2.5">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"].map((k, i) =>
             k ? (
-              <button key={i} onClick={() => press(k)} className="h-14 rounded-2xl bg-sand/70 text-xl font-semibold active:bg-mint-soft">
+              <button key={i} onClick={() => press(k)} className="h-14 rounded-2xl bg-sand/70 text-xl font-semibold active:bg-brand-soft">
                 {k}
               </button>
             ) : (

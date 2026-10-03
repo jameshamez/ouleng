@@ -56,13 +56,13 @@ export function MenuBrowser({ topOffset = 56 }: { topOffset?: number }) {
 
       {signature.length > 0 && (
         <section className="pt-4">
-          <h2 className="px-4 font-display text-teal-deep mb-2">✦ เมนูเด็ดของร้าน</h2>
+          <h2 className="px-4 font-display text-brand-deep mb-2">✦ เมนูเด็ดของร้าน</h2>
           <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2 snap-x scroll-px-4">
             {signature.map((i) => (
               <button key={i.id} onClick={() => setPicked(i)} className="snap-start shrink-0 w-36 text-left">
-                <FoodArt item={i} className="arch h-40 w-36 border-2 border-gold/40" />
+                <FoodArt item={i} className="arch h-40 w-36 border-2 border-sun/40" />
                 <div className="mt-2 text-sm font-semibold leading-snug line-clamp-2">{i.name}</div>
-                <div className="text-sm text-teal font-semibold">{baht(i.price)}</div>
+                <div className="text-sm text-brand font-semibold">{baht(i.price)}</div>
               </button>
             ))}
           </div>
@@ -77,7 +77,7 @@ export function MenuBrowser({ topOffset = 56 }: { topOffset?: number }) {
               data-cat={c.id}
               onClick={() => jump(c.id)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
-                active === c.id ? "bg-teal text-white shadow" : "bg-paper border border-line text-ink"
+                active === c.id ? "bg-brand text-white shadow" : "bg-paper border border-line text-ink"
               }`}
             >
               {c.emoji} {c.name}
@@ -88,9 +88,9 @@ export function MenuBrowser({ topOffset = 56 }: { topOffset?: number }) {
 
       {grouped.map((c) => (
         <section key={c.id} id={`cat-${c.id}`} ref={(el) => { sections.current[c.id] = el; }} className="px-4 pt-5">
-          <h3 className="font-display text-xl text-teal-deep flex items-center gap-2">
+          <h3 className="font-display text-xl text-brand-deep flex items-center gap-2">
             <span>{c.emoji}</span> {c.name}
-            <span className="ml-1 h-px flex-1 bg-gradient-to-r from-gold/60 to-transparent" />
+            <span className="ml-1 h-px flex-1 bg-gradient-to-r from-sun/60 to-transparent" />
           </h3>
           <div className="mt-3 grid gap-3">
             {c.items.map((i) => (
@@ -114,15 +114,15 @@ function ItemRow({ item, onOpen }: { item: MenuItem; onOpen: () => void }) {
       <div className="flex-1 min-w-0 py-1 pr-1 flex flex-col">
         <div className="flex items-start gap-1.5">
           <span className="font-semibold leading-snug">{item.name}</span>
-          {item.is_signature && <span className="chip bg-gold-soft text-[#8a6418] shrink-0 mt-0.5">เด็ด</span>}
+          {item.is_signature && <span className="chip bg-sun-soft text-sun-ink shrink-0 mt-0.5">เด็ด</span>}
         </div>
         {item.description && <p className="text-xs text-muted mt-0.5 line-clamp-2">{item.description}</p>}
         <div className="mt-auto flex items-center justify-between pt-1">
-          <span className="font-semibold text-teal">{baht(item.price)}</span>
+          <span className="font-semibold text-brand">{baht(item.price)}</span>
           {soldOut ? (
             <span className="chip bg-line text-muted">หมดแล้ว</span>
           ) : (
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-teal text-white text-lg shadow">+</span>
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-white text-lg shadow">+</span>
           )}
         </div>
       </div>
@@ -166,10 +166,10 @@ function ItemSheet({ item, onClose, onAdded }: { item: MenuItem | null; onClose:
   return (
     <Sheet open onClose={onClose}>
       <div className="px-5 pb-5">
-        <FoodArt item={item} className="arch mx-auto mt-1 h-44 w-44 border-4 border-gold-soft" />
-        <h2 className="font-display text-2xl text-teal-deep text-center mt-3">{item.name}</h2>
+        <FoodArt item={item} className="arch mx-auto mt-1 h-44 w-44 border-4 border-sun-soft" />
+        <h2 className="font-display text-2xl text-brand-deep text-center mt-3">{item.name}</h2>
         {item.description && <p className="text-center text-sm text-muted mt-1">{item.description}</p>}
-        <p className="text-center text-lg font-semibold text-teal mt-1">{baht(item.price)}</p>
+        <p className="text-center text-lg font-semibold text-brand mt-1">{baht(item.price)}</p>
 
         {item.options.map((g) => (
           <div key={g.name} className="mt-5">
@@ -185,7 +185,7 @@ function ItemSheet({ item, onClose, onAdded }: { item: MenuItem | null; onClose:
                     key={c.label}
                     onClick={() => toggle(g.name, g.multi, c.label, c.price)}
                     className={`rounded-full border px-3.5 py-2 text-sm transition ${
-                      on ? "border-teal bg-mint-soft text-teal-deep font-semibold" : "border-line bg-paper"
+                      on ? "border-brand bg-brand-soft text-brand-deep font-semibold" : "border-line bg-paper"
                     }`}
                   >
                     {c.label}
@@ -227,8 +227,8 @@ export function CartBar({ label = "ดูตะกร้า", onOpen }: { label?
   if (cart.count === 0) return null;
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
-      <button onClick={onOpen} className="pointer-events-auto mx-auto flex w-full max-w-md items-center gap-3 rounded-full bg-teal px-5 py-3.5 text-white shadow-xl animate-pop">
-        <span className="grid h-7 min-w-7 place-items-center rounded-full bg-gold px-1.5 text-sm font-bold">{cart.count}</span>
+      <button onClick={onOpen} className="pointer-events-auto mx-auto flex w-full max-w-md items-center gap-3 rounded-full bg-brand px-5 py-3.5 text-white shadow-xl animate-pop">
+        <span className="grid h-7 min-w-7 place-items-center rounded-full bg-sun px-1.5 text-sm font-bold">{cart.count}</span>
         <span className="flex-1 text-left font-semibold">{label}</span>
         <span className="font-semibold">{baht(cart.total)}</span>
       </button>
@@ -249,7 +249,7 @@ export function CartLines() {
             {(l.options.length > 0 || l.note) && (
               <div className="text-xs text-muted truncate">{[...l.options.map((o) => o.label), l.note].filter(Boolean).join(" · ")}</div>
             )}
-            <div className="text-sm text-teal font-semibold">{baht(l.unit * l.qty)}</div>
+            <div className="text-sm text-brand font-semibold">{baht(l.unit * l.qty)}</div>
           </div>
           <Stepper value={l.qty} onChange={(n) => cart.setQty(l.key, n)} />
         </li>

@@ -13,7 +13,7 @@ export default function TakeawayPage() {
     <CartProvider scope="takeaway">
       <TopBar title="สั่งกลับบ้าน" back="/liff" />
       <div className="mx-auto max-w-md">
-        <div className="mx-4 mt-3 rounded-2xl bg-mint-soft px-4 py-3 text-sm text-teal-deep flex gap-2">
+        <div className="mx-4 mt-3 rounded-2xl bg-brand-soft px-4 py-3 text-sm text-brand-deep flex gap-2">
           <span>🛍</span>
           <span>ชำระผ่านพร้อมเพย์ก่อน ร้านจะเริ่มทำเมื่อได้รับยอดแล้ว แล้วแจ้งเตือนใน LINE ตอนอาหารพร้อมค่ะ</span>
         </div>
@@ -75,7 +75,7 @@ function Checkout() {
                     <button
                       key={s}
                       onClick={() => setTime(s)}
-                      className={`shrink-0 rounded-xl border px-3 py-2 text-sm tabular-nums ${s === time ? "border-teal bg-teal text-white" : "border-line bg-paper"}`}
+                      className={`shrink-0 rounded-xl border px-3 py-2 text-sm tabular-nums ${s === time ? "border-brand bg-brand text-white" : "border-line bg-paper"}`}
                     >
                       {s}
                     </button>
@@ -88,12 +88,12 @@ function Checkout() {
               <input className="input mt-1" placeholder="เช่น ขอช้อนส้อม" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} />
             </label>
           </div>
-          {err && <p className="mt-3 rounded-xl bg-coral-soft px-3 py-2 text-sm text-red">{err}</p>}
+          {err && <p className="mt-3 rounded-xl bg-peach-soft px-3 py-2 text-sm text-red">{err}</p>}
           <div className="mt-5 flex items-center justify-between text-lg">
             <span>ยอดรวม</span>
-            <span className="font-display text-2xl text-teal-deep">{baht(cart.total)}</span>
+            <span className="font-display text-2xl text-brand-deep">{baht(cart.total)}</span>
           </div>
-          <button className="btn btn-gold w-full mt-4 text-lg" disabled={busy || !time || !name.trim() || cart.count === 0} onClick={submit}>
+          <button className="btn btn-sun w-full mt-4 text-lg" disabled={busy || !time || !name.trim() || cart.count === 0} onClick={submit}>
             {busy ? "กำลังส่ง…" : "ยืนยัน & ชำระด้วยพร้อมเพย์"}
           </button>
         </div>

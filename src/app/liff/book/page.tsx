@@ -69,9 +69,9 @@ function BookFlow() {
   if (step === "menu") {
     return (
       <>
-        <TopBar title="สั่งอาหารล่วงหน้า" right={<button className="text-sm text-teal font-semibold" onClick={() => setStep("who")}>เสร็จ</button>} />
+        <TopBar title="สั่งอาหารล่วงหน้า" right={<button className="text-sm text-sun font-semibold" onClick={() => setStep("who")}>เสร็จ</button>} />
         <div className="mx-auto max-w-md">
-          <p className="mx-4 mt-3 rounded-2xl bg-gold-soft px-4 py-3 text-sm text-[#7a5612]">ร้านจะเริ่มทำเมื่อคุณมาถึงร้าน ชำระเงินตอนเช็กบิลพร้อมกันค่ะ</p>
+          <p className="mx-4 mt-3 rounded-2xl bg-sun-soft px-4 py-3 text-sm text-sun-ink">ร้านจะเริ่มทำเมื่อคุณมาถึงร้าน ชำระเงินตอนเช็กบิลพร้อมกันค่ะ</p>
           <MenuBrowser />
         </div>
         <CartBar label="เสร็จแล้ว กลับไปยืนยันการจอง" onOpen={() => setStep("who")} />
@@ -81,7 +81,7 @@ function BookFlow() {
 
   return (
     <>
-      <TopBar title="จองโต๊ะ" back={step === "who" ? undefined : "/liff"} right={step === "who" ? <button className="text-sm text-teal" onClick={() => setStep("when")}>‹ แก้ไขเวลา</button> : undefined} />
+      <TopBar title="จองโต๊ะ" back={step === "who" ? undefined : "/liff"} right={step === "who" ? <button className="text-sm text-sun" onClick={() => setStep("when")}>‹ แก้ไขเวลา</button> : undefined} />
       <main className="mx-auto max-w-md px-4 pb-32">
         {step === "when" && (
           <>
@@ -90,10 +90,10 @@ function BookFlow() {
                 <button
                   key={z.id}
                   onClick={() => setZone(z.id)}
-                  className={`arch border-2 px-3 pt-7 pb-4 text-center transition ${zone === z.id ? "border-teal bg-mint-soft shadow-md" : "border-line bg-paper"}`}
+                  className={`arch border-2 px-3 pt-7 pb-4 text-center transition ${zone === z.id ? "border-brand bg-brand-soft shadow-md" : "border-line bg-paper"}`}
                 >
                   <div className="text-3xl">{z.icon}</div>
-                  <div className="font-display text-teal-deep mt-1">{z.label}</div>
+                  <div className="font-display text-brand-deep mt-1">{z.label}</div>
                   <div className="text-[11px] text-muted">{z.sub}</div>
                 </button>
               ))}
@@ -116,7 +116,7 @@ function BookFlow() {
                     <button
                       key={d}
                       onClick={() => setDate(d)}
-                      className={`shrink-0 w-16 rounded-2xl border py-2 text-center transition ${d === date ? "border-teal bg-teal text-white shadow" : "border-line bg-paper"}`}
+                      className={`shrink-0 w-16 rounded-2xl border py-2 text-center transition ${d === date ? "border-brand bg-brand text-white shadow" : "border-line bg-paper"}`}
                     >
                       <div className="text-[11px] opacity-80">{i === 0 ? "วันนี้" : i === 1 ? "พรุ่งนี้" : dayName}</div>
                       <div className="font-display text-xl leading-tight">{rest[0]}</div>
@@ -131,7 +131,7 @@ function BookFlow() {
               <h2 className="font-semibold mb-2">เวลา</h2>
               {isLoading && <p className="text-sm text-muted">กำลังเช็กโต๊ะว่าง…</p>}
               {slots && slots.every((s) => s.left < 1) && (
-                <p className="mb-2 rounded-xl bg-gold-soft px-3 py-2 text-sm text-[#7a5612]">วันนี้ไม่มีรอบว่างแล้ว ลองเลือกวันอื่นนะคะ</p>
+                <p className="mb-2 rounded-xl bg-sun-soft px-3 py-2 text-sm text-sun-ink">วันนี้ไม่มีรอบว่างแล้ว ลองเลือกวันอื่นนะคะ</p>
               )}
               <div className="grid grid-cols-4 gap-2">
                 {(slots ?? []).map((s) => (
@@ -140,11 +140,11 @@ function BookFlow() {
                     disabled={s.left < 1}
                     onClick={() => setTime(s.time)}
                     className={`rounded-xl border py-2.5 text-sm tabular-nums transition disabled:opacity-35 disabled:line-through ${
-                      s.time === time ? "border-teal bg-teal text-white shadow" : "border-line bg-paper"
+                      s.time === time ? "border-brand bg-brand text-white shadow" : "border-line bg-paper"
                     }`}
                   >
                     {s.time}
-                    {s.left > 0 && s.left <= 2 && s.time !== time && <span className="block text-[10px] text-coral">เหลือ {s.left}</span>}
+                    {s.left > 0 && s.left <= 2 && s.time !== time && <span className="block text-[10px] text-peach">เหลือ {s.left}</span>}
                   </button>
                 ))}
               </div>
@@ -155,9 +155,9 @@ function BookFlow() {
         {step === "who" && (
           <>
             <section className="card mt-4 p-4 flex items-center gap-4">
-              <div className="arch tile-bg h-16 w-14 shrink-0 border-2 border-gold" />
+              <div className="arch pattern-bg h-16 w-14 shrink-0 border-2 border-sun" />
               <div>
-                <div className="font-display text-lg text-teal-deep">{thaiDate(date, true)} · {time} น.</div>
+                <div className="font-display text-lg text-brand-deep">{thaiDate(date, true)} · {time} น.</div>
                 <div className="text-sm text-muted">{party} ท่าน · {zone === "canal" ? "ริมคลอง" : "ในร้าน"} · นั่งได้ 2 ชม.</div>
               </div>
             </section>
@@ -190,11 +190,11 @@ function BookFlow() {
               {cart.count > 0 && (
                 <div className="mt-2">
                   <CartLines />
-                  <div className="text-right text-sm font-semibold text-teal-deep">ประมาณ {baht(cart.total)}</div>
+                  <div className="text-right text-sm font-semibold text-brand-deep">ประมาณ {baht(cart.total)}</div>
                 </div>
               )}
             </section>
-            {err && <p className="mt-3 rounded-xl bg-coral-soft px-3 py-2 text-sm text-red">{err}</p>}
+            {err && <p className="mt-3 rounded-xl bg-peach-soft px-3 py-2 text-sm text-red">{err}</p>}
           </>
         )}
       </main>
@@ -206,7 +206,7 @@ function BookFlow() {
               {time ? `ถัดไป · ${time} น.` : "เลือกเวลา"}
             </button>
           ) : (
-            <button className="btn btn-gold w-full text-lg" disabled={busy || !name.trim() || phone.replace(/\D/g, "").length < 9} onClick={submit}>
+            <button className="btn btn-sun w-full text-lg" disabled={busy || !name.trim() || phone.replace(/\D/g, "").length < 9} onClick={submit}>
               {busy ? "กำลังจอง…" : "ยืนยันการจอง"}
             </button>
           )}

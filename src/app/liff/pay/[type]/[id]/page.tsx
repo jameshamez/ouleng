@@ -23,7 +23,7 @@ export default function PayPage() {
   const back = targetType === "session" ? `/liff/table/${id}` : "/liff";
 
   useEffect(() => {
-    if (data?.payload) QRCode.toDataURL(data.payload, { margin: 1, width: 560, color: { dark: "#134a46", light: "#ffffff" } }).then(setQr);
+    if (data?.payload) QRCode.toDataURL(data.payload, { margin: 1, width: 560, color: { dark: "#9e140d", light: "#ffffff" } }).then(setQr);
   }, [data?.payload]);
 
   useEffect(() => {
@@ -73,10 +73,10 @@ export default function PayPage() {
         {data && !data.paid && (
           <>
             <section className="card mt-4 overflow-hidden text-center">
-              <div className="tile-ribbon" />
+              <div className="pattern-ribbon" />
               <div className="px-5 pt-4 pb-5">
                 <p className="text-sm text-muted">{data.label}</p>
-                <p className="font-display text-4xl text-teal-deep mt-1">{baht(data.amount)}</p>
+                <p className="font-display text-4xl text-brand-deep mt-1">{baht(data.amount)}</p>
                 <div className="mx-auto mt-4 w-60 rounded-3xl border-4 border-[#113566] bg-white p-3">
                   <div className="rounded-xl bg-[#113566] py-1.5 text-xs font-bold tracking-wider text-white">PromptPay · พร้อมเพย์</div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -93,7 +93,7 @@ export default function PayPage() {
             {data.pending ? (
               <section className="card mt-4 p-5 text-center animate-pop">
                 <div className="text-4xl">⏳</div>
-                <h2 className="font-display text-lg text-teal-deep mt-2">
+                <h2 className="font-display text-lg text-brand-deep mt-2">
                   {data.pending.method === "cash" ? "แจ้งพนักงานแล้ว รอรับเงินสดที่โต๊ะ" : "ส่งสลิปแล้ว รอร้านตรวจสอบ"}
                 </h2>
                 <p className="text-sm text-muted mt-1">หน้านี้จะอัปเดตอัตโนมัติเมื่อร้านยืนยัน</p>
@@ -110,14 +110,14 @@ export default function PayPage() {
                 ) : (
                   <button
                     onClick={() => fileInput.current?.click()}
-                    className="mt-3 w-full rounded-2xl border-2 border-dashed border-mint py-8 text-teal bg-mint-soft/40"
+                    className="mt-3 w-full rounded-2xl border-2 border-dashed border-brand-light py-8 text-brand bg-brand-soft/40"
                   >
                     <div className="text-3xl">🧾</div>
                     <div className="text-sm font-semibold mt-1">เลือกรูปสลิป</div>
                   </button>
                 )}
                 {preview && (
-                  <button className="mt-2 text-sm text-teal underline" onClick={() => fileInput.current?.click()}>
+                  <button className="mt-2 text-sm text-brand underline" onClick={() => fileInput.current?.click()}>
                     เปลี่ยนรูป
                   </button>
                 )}
@@ -131,7 +131,7 @@ export default function PayPage() {
                 )}
               </section>
             )}
-            {err && <p className="mt-3 rounded-xl bg-coral-soft px-3 py-2 text-sm text-red">{err}</p>}
+            {err && <p className="mt-3 rounded-xl bg-peach-soft px-3 py-2 text-sm text-red">{err}</p>}
             <input
               ref={fileInput}
               type="file"
@@ -157,10 +157,10 @@ export default function PayPage() {
 function Done({ title, text, href, cta }: { title: string; text: string; href: string; cta: string }) {
   return (
     <main className="mx-auto max-w-md min-h-dvh px-6 flex flex-col items-center justify-center text-center">
-      <div className="arch tile-bg h-40 w-32 grid place-items-center border-4 border-gold animate-pop">
-        <span className="grid h-16 w-16 place-items-center rounded-full bg-teal text-3xl text-white shadow-lg">✓</span>
+      <div className="arch pattern-bg h-40 w-32 grid place-items-center border-4 border-sun animate-pop">
+        <span className="grid h-16 w-16 place-items-center rounded-full bg-brand text-3xl text-white shadow-lg">✓</span>
       </div>
-      <h1 className="font-display text-2xl text-teal-deep mt-6">{title}</h1>
+      <h1 className="font-display text-2xl text-brand-deep mt-6">{title}</h1>
       <p className="text-muted mt-1">{text}</p>
       <Link href={href} className="btn btn-primary mt-6">
         {cta}

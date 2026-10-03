@@ -9,7 +9,7 @@ import type {
 } from "./types";
 
 export const OPEN_TIME = "12:00";
-export const CLOSE_TIME = "23:00";
+export const CLOSE_TIME = "24:00"; // kitchen last order 23:30 (see pickupSlots)
 export const BOOKING_MINUTES = 120;
 export const SLOT_STEP_MINUTES = 30;
 

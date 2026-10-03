@@ -24,7 +24,7 @@ export default function TablePage() {
     return (
       <main className="mx-auto max-w-md min-h-dvh px-6 flex flex-col items-center justify-center text-center">
         <Emblem size={72} />
-        <h1 className="font-display text-2xl text-teal-deep mt-4">ขอบคุณที่มาอุดหนุนค่ะ</h1>
+        <h1 className="font-display text-2xl text-brand-deep mt-4">ขอบคุณที่มาอุดหนุนค่ะ</h1>
         <p className="text-muted mt-1">โต๊ะ {table.code} ชำระเงินเรียบร้อยแล้ว</p>
         <Link href="/liff" className="btn btn-primary mt-6">กลับหน้าแรก</Link>
       </main>
@@ -33,16 +33,16 @@ export default function TablePage() {
 
   return (
     <CartProvider scope={`table:${sessionId}`}>
-      <div className="sticky top-0 z-30 bg-teal text-cream">
+      <div className="sticky top-0 z-30 bg-brand text-cream">
         <div className="mx-auto max-w-md flex items-center gap-3 px-4 h-14">
-          <div className="arch grid h-10 w-9 place-items-center bg-gold text-teal-deep font-display text-sm border-2 border-gold-soft">{table.code}</div>
+          <div className="arch grid h-10 w-9 place-items-center bg-sun text-brand-deep font-display text-sm border-2 border-sun-soft">{table.code}</div>
           <div className="flex-1 leading-tight">
             <div className="font-display">โต๊ะ {table.code}</div>
-            <div className="text-[11px] text-mint-soft">{table.zone === "canal" ? "ริมคลอง" : "ในร้าน"} · สั่งเพิ่มได้ตลอด</div>
+            <div className="text-[11px] text-brand-soft">{table.zone === "canal" ? "ริมคลอง" : "ในร้าน"} · สั่งเพิ่มได้ตลอด</div>
           </div>
-          <div className="flex rounded-full bg-teal-deep p-1 text-sm">
+          <div className="flex rounded-full bg-brand-deep p-1 text-sm">
             {(["menu", "bill"] as const).map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1 transition ${tab === t ? "bg-cream text-teal-deep font-semibold" : ""}`}>
+              <button key={t} onClick={() => setTab(t)} className={`rounded-full px-3 py-1 transition ${tab === t ? "bg-cream text-brand-deep font-semibold" : ""}`}>
                 {t === "menu" ? "เมนู" : `บิล ${items.length ? `(${items.filter((i) => i.status !== "cancelled").length})` : ""}`}
               </button>
             ))}
@@ -91,7 +91,7 @@ function SendOrder({ sessionId, onSent }: { sessionId: string; onSent: () => voi
       <Sheet open={open} onClose={() => setOpen(false)} title="ยืนยันสั่งอาหาร">
         <div className="px-5 pb-6">
           <CartLines />
-          {err && <p className="mt-3 rounded-xl bg-coral-soft px-3 py-2 text-sm text-red">{err}</p>}
+          {err && <p className="mt-3 rounded-xl bg-peach-soft px-3 py-2 text-sm text-red">{err}</p>}
           <button className="btn btn-primary w-full mt-5 text-lg" disabled={busy || cart.count === 0} onClick={send}>
             {busy ? "กำลังส่ง…" : `ส่งเข้าครัว · ${baht(cart.total)}`}
           </button>
@@ -131,7 +131,7 @@ function Bill({ items, total, sessionId, billRequested, onChanged }: { items: Or
   return (
     <div className="px-4 pb-16">
       <section className="card mt-4 overflow-hidden">
-        <div className="tile-ribbon" />
+        <div className="pattern-ribbon" />
         <ul className="divide-y divide-line px-4">
           {items.map((i) => (
             <li key={i.id} className={`flex items-center gap-3 py-3 ${i.status === "cancelled" ? "opacity-50" : ""}`}>
@@ -150,11 +150,11 @@ function Bill({ items, total, sessionId, billRequested, onChanged }: { items: Or
         </ul>
         <div className="flex items-center justify-between bg-sand/60 px-4 py-4">
           <span className="font-semibold">ยอดรวม</span>
-          <span className="font-display text-2xl text-teal-deep">{baht(total)}</span>
+          <span className="font-display text-2xl text-brand-deep">{baht(total)}</span>
         </div>
       </section>
-      {err && <p className="mt-3 rounded-xl bg-coral-soft px-3 py-2 text-sm text-red">{err}</p>}
-      <button className="btn btn-gold w-full mt-5 text-lg" disabled={busy || total <= 0} onClick={checkout}>
+      {err && <p className="mt-3 rounded-xl bg-peach-soft px-3 py-2 text-sm text-red">{err}</p>}
+      <button className="btn btn-sun w-full mt-5 text-lg" disabled={busy || total <= 0} onClick={checkout}>
         {billRequested ? "ไปหน้าชำระเงิน" : "เช็กบิล"}
       </button>
     </div>

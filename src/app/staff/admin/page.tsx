@@ -21,18 +21,18 @@ export default function AdminPage() {
           { label: "พร้อมเพย์", value: sales ? baht(sales.promptpay) : "…" },
           { label: "เงินสด", value: sales ? baht(sales.cash) : "…" },
         ].map((k) => (
-          <div key={k.label} className={`card p-4 ${k.big ? "bg-teal text-white border-teal" : ""}`}>
-            <div className={`text-xs ${k.big ? "text-mint-soft" : "text-muted"}`}>{k.label}</div>
+          <div key={k.label} className={`card p-4 ${k.big ? "bg-brand text-white border-brand" : ""}`}>
+            <div className={`text-xs ${k.big ? "text-brand-soft" : "text-muted"}`}>{k.label}</div>
             <div className="font-display text-2xl mt-1">{k.value}</div>
           </div>
         ))}
       </section>
 
       <div className="no-print mt-6 flex gap-2">
-        <button onClick={() => setTab("menu")} className={`rounded-full px-4 py-2 text-sm ${tab === "menu" ? "bg-teal text-white" : "bg-paper border border-line"}`}>
+        <button onClick={() => setTab("menu")} className={`rounded-full px-4 py-2 text-sm ${tab === "menu" ? "bg-brand text-white" : "bg-paper border border-line"}`}>
           🍽 จัดการเมนู
         </button>
-        <button onClick={() => setTab("qr")} className={`rounded-full px-4 py-2 text-sm ${tab === "qr" ? "bg-teal text-white" : "bg-paper border border-line"}`}>
+        <button onClick={() => setTab("qr")} className={`rounded-full px-4 py-2 text-sm ${tab === "qr" ? "bg-brand text-white" : "bg-paper border border-line"}`}>
           🔳 QR ประจำโต๊ะ
         </button>
       </div>
@@ -56,7 +56,7 @@ function MenuEditor() {
     <div className="mt-4 grid gap-5">
       {data.categories.map((c) => (
         <section key={c.id}>
-          <h2 className="font-display text-lg text-teal-deep mb-2">
+          <h2 className="font-display text-lg text-brand-deep mb-2">
             {c.emoji} {c.name}
           </h2>
           <div className="card divide-y divide-line">
@@ -66,11 +66,11 @@ function MenuEditor() {
                 <div key={i.id} className="flex flex-wrap items-center gap-3 p-3">
                   <FoodArt item={i} className="h-12 w-12 rounded-xl" />
                   <input
-                    className="flex-1 min-w-40 bg-transparent font-medium rounded-lg px-2 py-1 hover:bg-sand focus:bg-paper focus:outline-teal"
+                    className="flex-1 min-w-40 bg-transparent font-medium rounded-lg px-2 py-1 hover:bg-sand focus:bg-paper focus:outline-brand"
                     defaultValue={i.name}
                     onBlur={(e) => e.target.value !== i.name && save(i.id, { name: e.target.value })}
                   />
-                  <span className={`chip ${i.station === "somtam" ? "bg-mint-soft text-teal-deep" : "bg-coral-soft text-red"}`}>
+                  <span className={`chip ${i.station === "somtam" ? "bg-brand-soft text-brand-deep" : "bg-peach-soft text-red"}`}>
                     {i.station === "somtam" ? "ครัวส้มตำ" : "คาเฟ่"}
                   </span>
                   <label className="flex items-center gap-1">
@@ -86,13 +86,13 @@ function MenuEditor() {
                   <button
                     title="เมนูเด็ด"
                     onClick={() => save(i.id, { is_signature: !i.is_signature })}
-                    className={`chip py-1 ${i.is_signature ? "bg-gold text-white" : "bg-sand text-muted"}`}
+                    className={`chip py-1 ${i.is_signature ? "bg-sun text-brand-deep" : "bg-sand text-muted"}`}
                   >
                     ✦ เด็ด
                   </button>
                   <button
                     onClick={() => save(i.id, { is_available: !i.is_available })}
-                    className={`chip py-1 w-16 justify-center ${i.is_available ? "bg-teal text-white" : "bg-line text-muted"}`}
+                    className={`chip py-1 w-16 justify-center ${i.is_available ? "bg-brand text-white" : "bg-line text-muted"}`}
                   >
                     {i.is_available ? "มีขาย" : "หมด"}
                   </button>
@@ -117,7 +117,7 @@ function TableQrs() {
   useEffect(() => {
     if (!data) return;
     Promise.all(
-      data.map(async (t) => [t.id, await QRCode.toDataURL(qrTarget(t.path), { margin: 1, width: 400, color: { dark: "#134a46", light: "#ffffff" } })] as const),
+      data.map(async (t) => [t.id, await QRCode.toDataURL(qrTarget(t.path), { margin: 1, width: 400, color: { dark: "#9e140d", light: "#ffffff" } })] as const),
     ).then((pairs) => setImgs(Object.fromEntries(pairs)));
   }, [data]);
 
@@ -132,15 +132,15 @@ function TableQrs() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 print:grid-cols-3">
         {data.map((t) => (
-          <div key={t.id} className="arch tile-bg p-2 break-inside-avoid border-2 border-gold">
+          <div key={t.id} className="arch pattern-bg p-2 break-inside-avoid border-2 border-sun">
             <div className="arch bg-paper px-4 pt-6 pb-4 text-center">
               <div className="flex justify-center"><Emblem size={36} /></div>
-              <div className="font-display text-teal-deep mt-1">อูเล้งคาเฟ่</div>
-              <div className="font-display text-4xl text-teal mt-1">{t.code}</div>
+              <div className="font-display text-brand-deep mt-1">อูเล้งคาเฟ่</div>
+              <div className="font-display text-4xl text-brand mt-1">{t.code}</div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {imgs[t.id] ? <img src={imgs[t.id]} alt={`QR โต๊ะ ${t.code}`} className="mx-auto mt-2 w-36" /> : <div className="mx-auto mt-2 h-36 w-36" />}
               <div className="mt-2 text-xs text-muted">สแกนด้วย LINE เพื่อสั่งอาหาร</div>
-              <a href={t.path} target="_blank" rel="noreferrer" className="no-print mt-1 block text-[11px] text-teal underline">
+              <a href={t.path} target="_blank" rel="noreferrer" className="no-print mt-1 block text-[11px] text-brand underline">
                 ทดลองเปิด
               </a>
             </div>

@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
-/* อูเล้งคาเฟ่ — Phuket Sino-Portuguese palette */
+/* อูเล้งคาเฟ่ — brand palette from the shop logo & posters: Chinese red, logo coral, poster yellow */
 :root {
-  --cream: #fbf5ea;
-  --paper: #fffdf8;
-  --sand: #f1e4cb;
-  --line: #e8d9bb;
-  --teal: #1f6b66;
-  --teal-deep: #134a46;
-  --mint: #7fc4b4;
-  --mint-soft: #dff1ec;
-  --coral: #e58c7e;
-  --coral-soft: #fbe3de;
-  --gold: #c99a3c;
-  --gold-soft: #f6e7c4;
-  --red: #b5332a;
-  --ink: #2b2320;
-  --muted: #7a6b60;
+  --cream: #fff8f4;
+  --paper: #ffffff;
+  --sand: #fcebe4;
+  --line: #f3d6cc;
+  --brand: #d9261c;
+  --brand-deep: #9e140d;
+  --brand-light: #ef5b45;
+  --brand-soft: #fde6e1;
+  --peach: #f59e8a;
+  --peach-soft: #ffefe8;
+  --sun: #ffd21f;
+  --sun-soft: #fff4c2;
+  --sun-ink: #7a4f00;
+  --red: #b3170f;
+  --ink: #2b1411;
+  --muted: #8a5f57;
 }
 
 @theme inline {
@@ -24,14 +25,15 @@
   --color-paper: var(--paper);
   --color-sand: var(--sand);
   --color-line: var(--line);
-  --color-teal: var(--teal);
-  --color-teal-deep: var(--teal-deep);
-  --color-mint: var(--mint);
-  --color-mint-soft: var(--mint-soft);
-  --color-coral: var(--coral);
-  --color-coral-soft: var(--coral-soft);
-  --color-gold: var(--gold);
-  --color-gold-soft: var(--gold-soft);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-light: var(--brand-light);
+  --color-brand-soft: var(--brand-soft);
+  --color-peach: var(--peach);
+  --color-peach-soft: var(--peach-soft);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
+  --color-sun-ink: var(--sun-ink);
   --color-red: var(--red);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
@@ -50,23 +52,34 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-display), var(--font-body), serif;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
-/* Encaustic tile background */
-.tile-bg {
-  background-color: var(--sand);
-  background-image: url("/tile.svg");
-  background-size: 64px 64px;
+/* Red poster wall with the faint floral motif */
+.pattern-bg {
+  background-color: var(--brand);
+  background-image: url("/pattern.svg");
+  background-size: 96px 96px;
 }
 
-/* Thin tile ribbon used as a section divider */
-.tile-ribbon {
-  height: 14px;
-  background-image: url("/tile.svg");
-  background-size: 28px 28px;
-  border-block: 2px solid var(--teal);
+/* Thin ribbon used as a section divider */
+.pattern-ribbon {
+  height: 12px;
+  background-color: var(--brand);
+  background-image: url("/pattern.svg");
+  background-size: 24px 24px;
+  border-block: 2px solid var(--sun);
+}
+
+/* Big poster headline: yellow on red */
+.poster-title {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  font-weight: 700;
+  color: var(--sun);
+  line-height: 1.05;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* Shophouse arch top */
@@ -78,7 +91,7 @@ body {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 20px;
-  box-shadow: 0 1px 0 rgba(43, 35, 32, 0.04), 0 8px 24px -16px rgba(43, 35, 32, 0.25);
+  box-shadow: 0 1px 0 rgba(43, 20, 17, 0.04), 0 8px 24px -16px rgba(158, 20, 13, 0.3);
 }
 
 .btn {
@@ -99,17 +112,21 @@ body {
   pointer-events: none;
 }
 .btn-primary {
-  background: var(--teal);
+  background: var(--brand);
   color: #fff;
-  box-shadow: 0 6px 16px -8px rgba(31, 107, 102, 0.8);
+  box-shadow: 0 6px 16px -8px rgba(217, 38, 28, 0.8);
 }
 .btn-primary:hover {
-  background: var(--teal-deep);
+  background: var(--brand-deep);
 }
-.btn-gold {
-  background: linear-gradient(180deg, #d9ae55, var(--gold));
-  color: #fff;
-  box-shadow: 0 6px 16px -8px rgba(201, 154, 60, 0.9);
+.btn-sun {
+  background: var(--sun);
+  color: var(--brand-deep);
+  font-weight: 700;
+  box-shadow: 0 6px 16px -8px rgba(160, 110, 0, 0.7);
+}
+.btn-sun:hover {
+  background: #ffc800;
 }
 .btn-ghost {
   background: var(--paper);
@@ -117,7 +134,7 @@ body {
   color: var(--ink);
 }
 .btn-danger {
-  background: var(--coral-soft);
+  background: var(--sand);
   color: var(--red);
 }
 
@@ -142,8 +159,8 @@ body {
   transition: border 0.15s, box-shadow 0.15s;
 }
 .input:focus {
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px var(--mint-soft);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
 .no-scrollbar::-webkit-scrollbar {

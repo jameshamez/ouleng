@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Anuphan, Chonburi } from "next/font/google";
+import { Anuphan, Kanit } from "next/font/google";
 import "./globals.css";
 
 const body = Anuphan({ variable: "--font-body", subsets: ["thai", "latin"], weight: ["300", "400", "500", "600", "700"] });
-const display = Chonburi({ variable: "--font-display", subsets: ["thai", "latin"], weight: "400" });
+const display = Kanit({ variable: "--font-display", subsets: ["thai", "latin"], weight: ["600", "700"] });
 
 export const metadata: Metadata = {
   title: "อูเล้งคาเฟ่ แก้วอินทร์",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1f6b66",
+  themeColor: "#d9261c",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -38,7 +38,7 @@ describe("bookingSlots", () => {
   it("runs every 30 minutes from opening until 2h before close", () => {
     const s = bookingSlots();
     expect(s[0]).toBe("12:00");
-    expect(s.at(-1)).toBe("21:00");
+    expect(s.at(-1)).toBe("22:00");
     expect(s).toContain("18:30");
   });
 });

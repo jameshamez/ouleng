@@ -30,27 +30,27 @@ export default function OrderStatus() {
           <>
             <section className="card mt-4 p-5 text-center">
               <p className="text-sm text-muted">สั่งกลับบ้าน · คุณ{data.order.customer_name}</p>
-              <p className="font-display text-3xl text-teal-deep mt-1">รับ {data.order.pickup_time} น.</p>
+              <p className="font-display text-3xl text-brand-deep mt-1">รับ {data.order.pickup_time} น.</p>
               <div className="mt-5 flex items-start">
                 {STEPS.map((s, i) => (
                   <div key={s.key} className="flex-1 flex flex-col items-center relative">
-                    {i > 0 && <div className={`absolute right-1/2 top-5 h-1 w-full -z-0 ${i <= step ? "bg-teal" : "bg-line"}`} />}
+                    {i > 0 && <div className={`absolute right-1/2 top-5 h-1 w-full -z-0 ${i <= step ? "bg-brand" : "bg-line"}`} />}
                     <div
                       className={`relative z-10 grid h-10 w-10 place-items-center rounded-full text-lg transition ${
-                        i < step ? "bg-teal text-white" : i === step ? "bg-gold text-white ring-4 ring-gold-soft animate-pulse" : "bg-sand"
+                        i < step ? "bg-brand text-white" : i === step ? "bg-sun text-brand-deep ring-4 ring-sun-soft animate-pulse" : "bg-sand"
                       }`}
                     >
                       {i < step ? "✓" : s.icon}
                     </div>
-                    <span className={`mt-1.5 text-xs ${i === step ? "font-semibold text-teal-deep" : "text-muted"}`}>{s.label}</span>
+                    <span className={`mt-1.5 text-xs ${i === step ? "font-semibold text-brand-deep" : "text-muted"}`}>{s.label}</span>
                   </div>
                 ))}
               </div>
               {data.order.status === "ready" && (
-                <p className="mt-5 rounded-2xl bg-mint-soft py-3 text-teal-deep font-semibold animate-pop">อาหารพร้อมแล้ว แวะรับที่เคาน์เตอร์ได้เลยค่ะ 🎉</p>
+                <p className="mt-5 rounded-2xl bg-brand-soft py-3 text-brand-deep font-semibold animate-pop">อาหารพร้อมแล้ว แวะรับที่เคาน์เตอร์ได้เลยค่ะ 🎉</p>
               )}
               {data.order.status === "awaiting_payment" && (
-                <Link href={`/liff/pay/order/${id}`} className="btn btn-gold mt-5 w-full">
+                <Link href={`/liff/pay/order/${id}`} className="btn btn-sun mt-5 w-full">
                   ไปชำระเงิน
                 </Link>
               )}
@@ -73,7 +73,7 @@ export default function OrderStatus() {
               </ul>
               <div className="mt-2 flex justify-between border-t border-line pt-3 font-semibold">
                 <span>รวม</span>
-                <span className="text-teal-deep">{baht(data.total)}</span>
+                <span className="text-brand-deep">{baht(data.total)}</span>
               </div>
             </section>
           </>

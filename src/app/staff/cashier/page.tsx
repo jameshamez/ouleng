@@ -13,9 +13,9 @@ type Board = {
 };
 
 const TA_LABEL: Record<string, { text: string; cls: string }> = {
-  awaiting_payment: { text: "รอชำระ", cls: "bg-coral-soft text-red" },
-  placed: { text: "กำลังทำ", cls: "bg-gold-soft text-[#8a6418]" },
-  ready: { text: "พร้อมรับ", cls: "bg-teal text-white" },
+  awaiting_payment: { text: "รอชำระ", cls: "bg-peach-soft text-red" },
+  placed: { text: "กำลังทำ", cls: "bg-sun-soft text-sun-ink" },
+  ready: { text: "พร้อมรับ", cls: "bg-brand text-white" },
 };
 
 export default function CashierPage() {
@@ -37,11 +37,11 @@ export default function CashierPage() {
       <div className="grid gap-4 content-start">
         <section>
           <div className="flex items-end justify-between mb-3">
-            <h1 className="font-display text-2xl text-teal-deep">ผังโต๊ะ</h1>
+            <h1 className="font-display text-2xl text-brand-deep">ผังโต๊ะ</h1>
             <div className="flex gap-3 text-xs text-muted">
               <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-paper border border-line mr-1" />ว่าง</span>
-              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-mint mr-1" />กำลังทาน</span>
-              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-gold mr-1" />ขอเช็กบิล</span>
+              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-brand-light mr-1" />กำลังทาน</span>
+              <span><i className="inline-block h-2.5 w-2.5 rounded-full bg-sun mr-1" />ขอเช็กบิล</span>
             </div>
           </div>
           {(["indoor", "canal"] as const).map((zone) => (
@@ -58,21 +58,21 @@ export default function CashierPage() {
                         onClick={() => setTableId(t.id)}
                         className={`arch relative border-2 px-2 pt-5 pb-3 text-center transition hover:-translate-y-0.5 ${
                           st === "bill_requested"
-                            ? "border-gold bg-gold-soft animate-pulse"
+                            ? "border-sun bg-sun-soft animate-pulse"
                             : st === "open"
-                              ? "border-mint bg-mint-soft"
+                              ? "border-brand-light bg-brand-soft"
                               : "border-line bg-paper"
                         }`}
                       >
                         {t.pendingPayment && <span className="absolute right-1 top-1 h-3 w-3 rounded-full bg-red ring-2 ring-paper" />}
-                        <div className="font-display text-xl text-teal-deep">{t.code}</div>
+                        <div className="font-display text-xl text-brand-deep">{t.code}</div>
                         <div className="text-[11px] text-muted">{t.seats} ที่นั่ง</div>
                         {t.session ? (
                           <>
                             <div className="mt-1 font-semibold text-sm">{baht(t.total)}</div>
                             <div className="text-[11px] text-muted">
                               {t.waiting > 0 && `รอ ${t.waiting} `}
-                              {t.toServe > 0 && <span className="text-teal-deep font-semibold">เสิร์ฟ {t.toServe}</span>}
+                              {t.toServe > 0 && <span className="text-brand-deep font-semibold">เสิร์ฟ {t.toServe}</span>}
                             </div>
                           </>
                         ) : (
@@ -87,7 +87,7 @@ export default function CashierPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-teal-deep mb-2">🛍 สั่งกลับบ้านวันนี้</h2>
+          <h2 className="font-display text-xl text-brand-deep mb-2">🛍 สั่งกลับบ้านวันนี้</h2>
           {data.takeaways.length === 0 && <p className="text-sm text-muted">ยังไม่มี</p>}
           <div className="grid gap-2.5 sm:grid-cols-2">
             {data.takeaways.map((o) => (
@@ -122,9 +122,9 @@ export default function CashierPage() {
 
       <aside className="lg:sticky lg:top-20 h-fit">
         <section className="card overflow-hidden">
-          <div className="bg-teal text-white px-4 py-3 flex items-center justify-between">
+          <div className="bg-brand text-white px-4 py-3 flex items-center justify-between">
             <h2 className="font-display text-lg">รอตรวจชำระเงิน</h2>
-            <span className="chip bg-gold text-white">{data.payments.length}</span>
+            <span className="chip bg-sun text-brand-deep">{data.payments.length}</span>
           </div>
           <div className="divide-y divide-line max-h-[75vh] overflow-y-auto">
             {data.payments.length === 0 && <p className="p-6 text-center text-sm text-muted">ไม่มีรายการค้าง ✨</p>}
@@ -136,11 +136,11 @@ export default function CashierPage() {
                     <img src={p.slip_view} alt="สลิป" className="h-24 w-16 rounded-lg border border-line object-cover" />
                   </button>
                 ) : (
-                  <div className="grid h-24 w-16 shrink-0 place-items-center rounded-lg bg-gold-soft text-3xl">💵</div>
+                  <div className="grid h-24 w-16 shrink-0 place-items-center rounded-lg bg-sun-soft text-3xl">💵</div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate">{p.label}</div>
-                  <div className="font-display text-2xl text-teal-deep">{baht(p.amount)}</div>
+                  <div className="font-display text-2xl text-brand-deep">{baht(p.amount)}</div>
                   <div className="text-xs text-muted">
                     {p.method === "cash" ? "ขอจ่ายเงินสด" : "พร้อมเพย์"} · {new Date(p.created_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                   </div>
@@ -210,7 +210,7 @@ function TableSheet({ table, onClose, onChanged }: { table: TableCard | null; on
                       {i.options.length > 0 && <span className="block text-xs text-muted">{i.options.map((o) => o.label).join(" · ")}</span>}
                     </span>
                     {i.status === "ready" ? (
-                      <button className="chip bg-teal text-white py-1" onClick={() => run(() => api("setItemStatus", { itemId: i.id, status: "served" }))}>
+                      <button className="chip bg-brand text-white py-1" onClick={() => run(() => api("setItemStatus", { itemId: i.id, status: "served" }))}>
                         เสิร์ฟ ✓
                       </button>
                     ) : (
@@ -224,14 +224,14 @@ function TableSheet({ table, onClose, onChanged }: { table: TableCard | null; on
             )}
             <div className="mt-3 flex items-center justify-between rounded-2xl bg-sand/60 px-4 py-3">
               <span className="font-semibold">ยอดรวม</span>
-              <span className="font-display text-2xl text-teal-deep">{baht(data?.total ?? table.total)}</span>
+              <span className="font-display text-2xl text-brand-deep">{baht(data?.total ?? table.total)}</span>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <a className="btn btn-ghost text-sm" href={`/liff/table/${table.session.id}`} target="_blank" rel="noreferrer">
                 เปิดหน้าลูกค้า
               </a>
               <button
-                className="btn btn-gold text-sm"
+                className="btn btn-sun text-sm"
                 disabled={busy || !data}
                 onClick={() =>
                   confirm(data!.total > 0 ? `รับเงินสด ${baht(data!.total)} และปิดบิล?` : "ปิดโต๊ะนี้ (ไม่มีรายการ)?") &&

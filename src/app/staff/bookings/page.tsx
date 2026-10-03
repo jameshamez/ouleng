@@ -9,9 +9,9 @@ type Row = Booking & { table_code: string | null; preorder: OrderItem[] };
 type Board = { tables: (Table & { session: DiningSession | null })[] };
 
 const STATUS: Record<Booking["status"], { text: string; cls: string }> = {
-  pending: { text: "รอยืนยัน", cls: "bg-gold-soft text-[#8a6418]" },
-  confirmed: { text: "ยืนยันแล้ว", cls: "bg-mint-soft text-teal-deep" },
-  seated: { text: "เข้าโต๊ะแล้ว", cls: "bg-teal text-white" },
+  pending: { text: "รอยืนยัน", cls: "bg-sun-soft text-sun-ink" },
+  confirmed: { text: "ยืนยันแล้ว", cls: "bg-brand-soft text-brand-deep" },
+  seated: { text: "เข้าโต๊ะแล้ว", cls: "bg-brand text-white" },
   rejected: { text: "ปฏิเสธ", cls: "bg-line text-muted" },
   cancelled: { text: "ยกเลิก", cls: "bg-line text-muted" },
 };
@@ -42,13 +42,13 @@ export default function BookingsPage() {
   return (
     <main className="p-4 max-w-4xl mx-auto">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-2xl text-teal-deep">การจองโต๊ะ</h1>
+        <h1 className="font-display text-2xl text-brand-deep">การจองโต๊ะ</h1>
         <div className="flex items-center gap-1 rounded-full bg-paper border border-line p-1 ml-auto">
           <button className="h-9 w-9 rounded-full hover:bg-sand" onClick={() => setDate(shift(date, -1))}>‹</button>
           <input type="date" className="bg-transparent px-2 font-semibold" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
           <button className="h-9 w-9 rounded-full hover:bg-sand" onClick={() => setDate(shift(date, 1))}>›</button>
           {date !== today && (
-            <button className="rounded-full px-3 py-1.5 text-sm text-teal" onClick={() => setDate(today)}>วันนี้</button>
+            <button className="rounded-full px-3 py-1.5 text-sm text-brand" onClick={() => setDate(today)}>วันนี้</button>
           )}
         </div>
       </div>
@@ -64,16 +64,16 @@ export default function BookingsPage() {
         <div className="mt-4 grid gap-3">
           {data.map((b) => (
             <article key={b.id} className={`card flex flex-wrap items-center gap-4 p-4 ${["rejected", "cancelled"].includes(b.status) ? "opacity-50" : ""}`}>
-              <div className="arch grid h-16 w-14 place-items-center bg-teal text-white font-display text-lg border-2 border-gold">{b.time}</div>
+              <div className="arch grid h-16 w-14 place-items-center bg-brand text-white font-display text-lg border-2 border-sun">{b.time}</div>
               <div className="flex-1 min-w-48">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-lg">{b.name}</span>
                   <span className={`chip ${STATUS[b.status].cls}`}>{STATUS[b.status].text}</span>
-                  {b.table_code && <span className="chip bg-gold text-white">โต๊ะ {b.table_code}</span>}
+                  {b.table_code && <span className="chip bg-sun text-brand-deep">โต๊ะ {b.table_code}</span>}
                 </div>
                 <div className="text-sm text-muted">
                   {b.party_size} ท่าน · {b.zone === "canal" ? "🌙 ริมคลอง" : "🏮 ในร้าน"} ·{" "}
-                  <a className="text-teal underline" href={`tel:${b.phone}`}>{b.phone}</a>
+                  <a className="text-brand underline" href={`tel:${b.phone}`}>{b.phone}</a>
                 </div>
                 {b.note && <div className="text-sm text-red">📝 {b.note}</div>}
                 {b.preorder.length > 0 && (
@@ -91,7 +91,7 @@ export default function BookingsPage() {
                   </>
                 )}
                 {(b.status === "pending" || b.status === "confirmed") && (
-                  <button className="btn btn-gold py-2 text-sm" onClick={() => setSeating(b)}>🪑 ลูกค้ามาถึง</button>
+                  <button className="btn btn-sun py-2 text-sm" onClick={() => setSeating(b)}>🪑 ลูกค้ามาถึง</button>
                 )}
                 {b.status === "confirmed" && (
                   <button className="btn btn-ghost py-2 text-sm" onClick={() => act(b.id, "cancelled")}>ยกเลิก</button>
@@ -140,9 +140,9 @@ function SeatSheet({ booking, onClose, onDone }: { booking: Row | null; onClose:
                   key={t.id}
                   disabled={busy || busyTable}
                   onClick={() => seat(t.id)}
-                  className={`arch border-2 pt-4 pb-2 text-center disabled:opacity-30 ${t.zone === booking.zone ? "border-teal" : "border-line"} ${small ? "bg-coral-soft" : "bg-paper"}`}
+                  className={`arch border-2 pt-4 pb-2 text-center disabled:opacity-30 ${t.zone === booking.zone ? "border-brand" : "border-line"} ${small ? "bg-peach-soft" : "bg-paper"}`}
                 >
-                  <div className="font-display text-teal-deep">{t.code}</div>
+                  <div className="font-display text-brand-deep">{t.code}</div>
                   <div className="text-[11px] text-muted">{t.seats} ที่</div>
                 </button>
               );
