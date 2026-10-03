@@ -1,26 +1,196 @@
 @import "tailwindcss";
 
+/* อูเล้งคาเฟ่ — Phuket Sino-Portuguese palette */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #fbf5ea;
+  --paper: #fffdf8;
+  --sand: #f1e4cb;
+  --line: #e8d9bb;
+  --teal: #1f6b66;
+  --teal-deep: #134a46;
+  --mint: #7fc4b4;
+  --mint-soft: #dff1ec;
+  --coral: #e58c7e;
+  --coral-soft: #fbe3de;
+  --gold: #c99a3c;
+  --gold-soft: #f6e7c4;
+  --red: #b5332a;
+  --ink: #2b2320;
+  --muted: #7a6b60;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-line: var(--line);
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-red: var(--red);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), var(--font-body), serif;
+  letter-spacing: 0.01em;
+}
+
+/* Encaustic tile background */
+.tile-bg {
+  background-color: var(--sand);
+  background-image: url("/tile.svg");
+  background-size: 64px 64px;
+}
+
+/* Thin tile ribbon used as a section divider */
+.tile-ribbon {
+  height: 14px;
+  background-image: url("/tile.svg");
+  background-size: 28px 28px;
+  border-block: 2px solid var(--teal);
+}
+
+/* Shophouse arch top */
+.arch {
+  border-radius: 999px 999px 18px 18px;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 1px 0 rgba(43, 35, 32, 0.04), 0 8px 24px -16px rgba(43, 35, 32, 0.25);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.8rem 1.25rem;
+  font-weight: 600;
+  transition: transform 0.12s ease, background 0.2s ease, opacity 0.2s;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(31, 107, 102, 0.8);
+}
+.btn-primary:hover {
+  background: var(--teal-deep);
+}
+.btn-gold {
+  background: linear-gradient(180deg, #d9ae55, var(--gold));
+  color: #fff;
+  box-shadow: 0 6px 16px -8px rgba(201, 154, 60, 0.9);
+}
+.btn-ghost {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.btn-danger {
+  background: var(--coral-soft);
+  color: var(--red);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0.75rem 0.9rem;
+  font-size: 16px; /* stops iOS zooming on focus */
+  outline: none;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+.input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--mint-soft);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-sheet {
+  animation: sheet-up 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.animate-fade {
+  animation: fade-in 0.2s ease;
+}
+.animate-pop {
+  animation: pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }

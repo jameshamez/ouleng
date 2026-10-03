@@ -1,69 +1,71 @@
-import Image from "next/image";
+import Link from "next/link";
+import { connection } from "next/server";
+import { Emblem } from "@/components/ui";
+import { isSupabase } from "@/lib/db";
+import { lineLive } from "@/lib/line";
+import { tableQrs } from "@/lib/service";
 
-export default function Home() {
+// Entry hub: shortcuts to the customer (LINE) side, staff screens and table QRs.
+export default async function Home() {
+  await connection();
+  // Table links carry each table's secret key, so only list them in demo mode.
+  const tables = lineLive ? [] : await tableQrs();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-dvh tile-bg px-4 py-10">
+      <div className="mx-auto max-w-3xl">
+        <header className="arch mx-auto max-w-md bg-teal text-cream text-center px-8 pt-12 pb-8 border-4 border-gold shadow-2xl">
+          <div className="flex justify-center"><Emblem size={64} /></div>
+          <h1 className="font-display text-3xl mt-3">อูเล้งคาเฟ่</h1>
+          <p className="text-mint-soft text-sm mt-1">ระบบจองโต๊ะ & สั่งอาหารผ่าน LINE</p>
+          <div className="mt-4 flex justify-center gap-2 text-[11px]">
+            <span className={`chip ${lineLive ? "bg-[#06c755] text-white" : "bg-gold-soft text-[#7a5612]"}`}>
+              LINE: {lineLive ? "เชื่อมต่อแล้ว" : "โหมดจำลอง"}
+            </span>
+            <span className={`chip ${isSupabase ? "bg-[#3ecf8e] text-white" : "bg-gold-soft text-[#7a5612]"}`}>
+              DB: {isSupabase ? "Supabase" : "ไฟล์เดโม"}
+            </span>
+          </div>
+        </header>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          <section className="card p-5">
+            <h2 className="font-display text-xl text-teal-deep">📱 ฝั่งลูกค้า (ใน LINE)</h2>
+            <p className="text-sm text-muted mt-1">หน้าที่เปิดจาก Rich Menu ของ LINE OA ร้าน</p>
+            <div className="mt-4 grid gap-2">
+              <Link className="btn btn-primary" href="/liff">หน้าแรกลูกค้า</Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link className="btn btn-ghost text-sm" href="/liff/book">🪑 จองโต๊ะ</Link>
+                <Link className="btn btn-ghost text-sm" href="/liff/takeaway">🛍 กลับบ้าน</Link>
+              </div>
+            </div>
+          </section>
+
+          <section className="card p-5">
+            <h2 className="font-display text-xl text-teal-deep">🧑‍🍳 ฝั่งร้าน</h2>
+            <p className="text-sm text-muted mt-1">เปิดบนแท็บเล็ต/คอมที่ร้าน · เข้าด้วย PIN</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <Link className="btn btn-ghost text-sm" href="/staff/kitchen">🔥 จอครัว</Link>
+              <Link className="btn btn-ghost text-sm" href="/staff/cashier">💰 แคชเชียร์</Link>
+              <Link className="btn btn-ghost text-sm" href="/staff/bookings">📅 การจอง</Link>
+              <Link className="btn btn-ghost text-sm" href="/staff/admin">⚙️ จัดการร้าน</Link>
+            </div>
+            {!lineLive && <p className="mt-3 text-[11px] text-muted">PIN เดโม: ส้มตำ 1111 · คาเฟ่ 2222 · แคชเชียร์ 3333 · แอดมิน 9999</p>}
+          </section>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        {tables.length > 0 && <section className="card mt-4 p-5">
+          <h2 className="font-display text-xl text-teal-deep">🔳 จำลองสแกน QR ที่โต๊ะ</h2>
+          <p className="text-sm text-muted mt-1">กดเลขโต๊ะ = ลูกค้าสแกน QR บนโต๊ะนั้น</p>
+          <div className="mt-4 grid grid-cols-4 sm:grid-cols-8 gap-2">
+            {tables.map((t) => (
+              <Link key={t.id} href={t.path} className={`arch border-2 pt-4 pb-2 text-center font-display hover:-translate-y-0.5 transition ${t.zone === "canal" ? "border-mint bg-mint-soft" : "border-gold bg-gold-soft"}`}>
+                {t.code}
+              </Link>
+            ))}
+          </div>
+        </section>}
+      </div>
+    </main>
   );
 }

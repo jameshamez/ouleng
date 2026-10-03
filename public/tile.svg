@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+  <!-- Peranakan-style encaustic tile: one repeat unit -->
+  <rect width="80" height="80" fill="#F6EBD6"/>
+  <g fill="#7FC4B4">
+    <path d="M0 0h20a20 20 0 0 1-20 20z"/>
+    <path d="M80 0v20a20 20 0 0 1-20-20z"/>
+    <path d="M0 80v-20a20 20 0 0 1 20 20z"/>
+    <path d="M80 80h-20a20 20 0 0 1 20-20z"/>
+  </g>
+  <g fill="#E58C7E">
+    <path d="M40 14c7 8 7 18 0 26c-7-8-7-18 0-26z"/>
+    <path d="M40 66c-7-8-7-18 0-26c7 8 7 18 0 26z"/>
+    <path d="M14 40c8-7 18-7 26 0c-8 7-18 7-26 0z"/>
+    <path d="M66 40c-8 7-18 7-26 0c8-7 18-7 26 0z"/>
+  </g>
+  <g fill="#1F6B66">
+    <path d="M24 24c6 0 10 4 10 10c-6 0-10-4-10-10z"/>
+    <path d="M56 24c0 6-4 10-10 10c0-6 4-10 10-10z"/>
+    <path d="M24 56c0-6 4-10 10-10c0 6-4 10-10 10z"/>
+    <path d="M56 56c-6 0-10-4-10-10c6 0 10 4 10 10z"/>
+  </g>
+  <circle cx="40" cy="40" r="5" fill="#D4A94A"/>
+  <circle cx="40" cy="40" r="2" fill="#F6EBD6"/>
+  <rect x="0.5" y="0.5" width="79" height="79" fill="none" stroke="#E7D6B4" stroke-width="1"/>
+</svg>
