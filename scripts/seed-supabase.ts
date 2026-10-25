@@ -11,16 +11,21 @@ if (!url || !key) {
 }
 const sb = createClient(url, key, { auth: { persistSession: false } });
 
-for (const [table, rows] of [
-  ["menu_categories", seedCategories],
-  ["menu_items", seedMenuItems],
-  ["tables", seedTables],
-  ["floor_decor", seedDecor],
-] as const) {
-  const { error } = await sb.from(table).upsert(rows as never, { onConflict: "id", ignoreDuplicates: true });
-  if (error) {
-    console.error(table, error.message);
-    process.exit(1);
+// Wrapped in a function: tsx compiles this file as CommonJS, which has no top-level await.
+async function main() {
+  for (const [table, rows] of [
+    ["menu_categories", seedCategories],
+    ["menu_items", seedMenuItems],
+    ["tables", seedTables],
+    ["floor_decor", seedDecor],
+  ] as const) {
+    const { error } = await sb.from(table).upsert(rows as never, { onConflict: "id", ignoreDuplicates: true });
+    if (error) {
+      console.error(table, error.message);
+      process.exit(1);
+    }
+    console.log(`✓ ${table}: ${rows.length}`);
   }
-  console.log(`✓ ${table}: ${rows.length}`);
 }
+
+main();
